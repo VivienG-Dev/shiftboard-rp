@@ -8,7 +8,7 @@ import {
 import type { CompanyType } from '../../generated/prisma/client';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import type { CreateCompanyInput } from './companies.types';
+import type { CreateCompanyInput, CreateCompanyLocationInput } from './companies.types';
 
 function slugify(input: string) {
   return input
@@ -108,13 +108,13 @@ export class CompaniesService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         const fields = extractUniqueConstraintFields(error);
-        const field = fields[0];
+        const field = fields.includes('slug') ? 'slug' : fields.includes('name') ? 'name' : fields[0];
 
         const message =
           field === 'slug'
             ? 'A company with this slug already exists'
             : field === 'name'
-              ? 'A company with this name already exists'
+              ? 'You already have a company with this name'
               : 'A company with this name/slug already exists';
 
         throw new HttpException(
@@ -136,7 +136,16 @@ export class CompaniesService {
   async listMyCompanies(userId: string) {
     const memberships = await this.prisma.membership.findMany({
       where: { userId, archivedAt: null },
-      include: { company: true },
+      include: {
+        company: {
+          include: {
+            locations: {
+              where: { archivedAt: null },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -145,10 +154,66 @@ export class CompaniesService {
       .map((m) => m.company);
   }
 
+  async createCompanyLocation(
+    userId: string,
+    companyId: string,
+    input: CreateCompanyLocationInput,
+  ) {
+    await this.getCompany(userId, companyId);
+
+    const name = input.name?.trim();
+    if (!name) {
+      throw new BadRequestException('Location name is required');
+    }
+
+    try {
+      const location = await this.prisma.companyLocation.create({
+        data: { companyId, name },
+      });
+      return location;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const fields = extractUniqueConstraintFields(error);
+        const field = fields.includes('name') ? 'name' : fields[0];
+
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.CONFLICT,
+            error: 'Conflict',
+            message: 'A location with this name already exists for this company',
+            field,
+            fields,
+            code: error.code,
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+      throw error;
+    }
+  }
+
+  async listCompanyLocations(userId: string, companyId: string) {
+    await this.getCompany(userId, companyId);
+
+    return this.prisma.companyLocation.findMany({
+      where: { companyId, archivedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getCompany(userId: string, companyId: string) {
     const membership = await this.prisma.membership.findFirst({
       where: { userId, companyId, archivedAt: null },
-      include: { company: true },
+      include: {
+        company: {
+          include: {
+            locations: {
+              where: { archivedAt: null },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+      },
     });
 
     if (!membership || membership.company.archivedAt) {

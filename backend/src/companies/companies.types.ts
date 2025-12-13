@@ -5,3 +5,7 @@ export type CreateCompanyInput = {
   slug?: string;
   type?: CompanyType;
 };
+
+export type CreateCompanyLocationInput = {
+  name: string;
+};
