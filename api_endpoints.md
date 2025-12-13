@@ -144,7 +144,11 @@ Create a company and make requester `OWNER`.
 **Response**
 
 ```json
-{ "data": { "id": "uuid", "name": "...", "slug": "...", "ownerId": "uuid" } }
+{
+  "company": { "id": "uuid", "name": "...", "slug": "...", "ownerId": "uuid", "locations": [] },
+  "membership": { "id": "uuid", "companyId": "uuid", "userId": "uuid" },
+  "ownerRole": { "id": "uuid", "companyId": "uuid", "key": "owner", "name": "Owner" }
+}
 ```
 
 ### GET `/companies`
@@ -153,11 +157,41 @@ List companies the user belongs to.
 
 **Auth**: any authenticated user
 
+**Response**
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "...",
+      "slug": "...",
+      "ownerId": "uuid",
+      "locations": [{ "id": "uuid", "companyId": "uuid", "name": "Paris" }]
+    }
+  ]
+}
+```
+
 ### GET `/companies/:companyId`
 
 Company details.
 
 **Auth**: membership required + `company.read` (or `OWNER`)
+
+**Response**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "...",
+    "slug": "...",
+    "ownerId": "uuid",
+    "locations": [{ "id": "uuid", "companyId": "uuid", "name": "New York" }]
+  }
+}
+```
 
 ### PATCH `/companies/:companyId`
 
@@ -176,6 +210,37 @@ Update company settings.
 Archive a company.
 
 **Auth**: `company.archive` (or `OWNER`)
+
+---
+
+## 2.5 Company Locations
+
+Locations are branches/places under a company (e.g. “New York”, “Paris”).  
+Company = brand/org; shifts/sales cards can later be attached to a specific `locationId`.
+
+### POST `/companies/:companyId/locations`
+
+Create a location for a company.
+
+**Auth**: membership required + `company.update` (or `OWNER`)
+
+**Body**
+
+```json
+{ "name": "Paris" }
+```
+
+**Response**
+
+```json
+{ "data": { "id": "uuid", "companyId": "uuid", "name": "Paris" } }
+```
+
+### GET `/companies/:companyId/locations`
+
+List locations for a company.
+
+**Auth**: membership required + `company.read` (or `OWNER`)
 
 ---
 
@@ -445,12 +510,13 @@ Start a shift card for current user.
 **Body** (optional)
 
 ```json
-{ "note": "string", "roleId": "uuid", "startAt": "optional-iso" }
+{ "note": "string", "roleId": "uuid", "locationId": "optional-uuid", "startAt": "optional-iso" }
 ```
 
 **Rules**
 
 - `roleId` must be one of the roles assigned to the user’s membership (`MembershipRole`).
+- `locationId` (if provided) must belong to the company (and not be archived).
 
 **Response**
 

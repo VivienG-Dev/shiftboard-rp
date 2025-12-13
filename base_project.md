@@ -25,6 +25,7 @@ The goal is to provide a simple, stylish, RP-friendly dashboard to track stocks,
 ### Company Management
 
 - Create a company (bar / nightclub / restaurant)
+- Add and manage company locations (branches), e.g. “New York”, “Paris”
 - Invite members by email-bound invite code (MVP)
 - Manage company roles (custom role names + permissions; `OWNER` is fixed)
 
@@ -160,6 +161,16 @@ better-auth can run in:
 - `type` (`BAR`, `CLUB`, `FAST_FOOD`, `OTHER`)
 - `timestamps`
 
+### CompanyLocation (Branch / Place)
+
+Company represents the brand/org. Locations represent places/branches under that company.
+
+- `id`
+- `companyId`
+- `name` (e.g. “New York”, “Paris”)
+- `archivedAt` (optional)
+- `timestamps`
+
 ### Membership
 
 Defines a user’s membership within a company.
@@ -229,6 +240,7 @@ Allows a single user to have **multiple roles** inside the same company (e.g., b
 
 - `id`
 - `companyId`
+- `locationId` (optional; links the shift to a specific `CompanyLocation`)
 - `userId`
 - `roleId` → `CompanyRole.id` (the role the user is acting as for this shift card)
 - `startAt`
