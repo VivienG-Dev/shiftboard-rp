@@ -14,6 +14,36 @@ datasource db {
   provider = "postgresql"
 }
 
+enum CompanyType {
+  BAR
+  CLUB
+  FAST_FOOD
+  OTHER
+}
+
+enum ItemCategory {
+  DRINK
+  BOTTLE
+  FOOD
+  OTHER
+}
+
+enum SalesCardStatus {
+  DRAFT
+  SUBMITTED
+  LOCKED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum InviteType {
+  EMAIL_CODE
+}
+
 model User {
   id            String    @id
   name          String
@@ -25,8 +55,213 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  ownedCompanies           Company[]           @relation("CompanyOwner")
+  memberships             Membership[]
+  inventorySnapshotsCreated InventorySnapshot[] @relation("InventorySnapshotCreatedBy")
+  salesCards              SalesCard[]
+  invitesCreated          Invite[]            @relation("InviteCreatedBy")
+  invitesAccepted         Invite[]            @relation("InviteAcceptedBy")
+
   @@unique([email])
   @@map("user")
+}
+
+model Company {
+  id        String      @id @default(cuid())
+  name      String
+  slug      String?
+  type      CompanyType @default(OTHER)
+  ownerId   String
+  owner     User        @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  archivedAt DateTime?
+
+  memberships        Membership[]
+  roles              CompanyRole[]
+  items              Item[]
+  inventorySnapshots InventorySnapshot[]
+  salesCards         SalesCard[]
+  invites            Invite[]
+
+  @@unique([slug])
+  @@index([ownerId])
+  @@map("company")
+}
+
+model Membership {
+  id           String   @id @default(cuid())
+  userId       String
+  companyId    String
+  activeRoleId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  archivedAt   DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  membershipRoles MembershipRole[]
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+  @@index([userId])
+  @@map("membership")
+}
+
+model CompanyRole {
+  id          String   @id @default(cuid())
+  companyId   String
+  name        String
+  key         String
+  permissions String[]
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  archivedAt  DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  membershipRoles MembershipRole[]
+  salesCards      SalesCard[]
+  invites         Invite[]
+
+  @@unique([companyId, key])
+  @@index([companyId])
+  @@map("company_role")
+}
+
+model MembershipRole {
+  id           String   @id @default(cuid())
+  membershipId String
+  roleId       String
+  createdAt    DateTime @default(now())
+
+  membership Membership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  role       CompanyRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, roleId])
+  @@index([roleId])
+  @@map("membership_role")
+}
+
+model Item {
+  id        String       @id @default(cuid())
+  companyId String
+  name      String
+  category  ItemCategory @default(OTHER)
+  unit      String
+  basePrice Decimal?     @db.Decimal(10, 2)
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  archivedAt DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  inventorySnapshotLines InventorySnapshotLine[]
+  salesCardLines         SalesCardLine[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@map("item")
+}
+
+model InventorySnapshot {
+  id          String   @id @default(cuid())
+  companyId   String
+  createdById String
+  createdAt   DateTime @default(now())
+  note        String?
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("InventorySnapshotCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  lines InventorySnapshotLine[]
+
+  @@index([companyId, createdAt])
+  @@index([createdById])
+  @@map("inventory_snapshot")
+}
+
+model InventorySnapshotLine {
+  id         String @id @default(cuid())
+  snapshotId String
+  itemId     String
+  quantity   Int
+
+  snapshot InventorySnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  item     Item              @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@unique([snapshotId, itemId])
+  @@index([itemId])
+  @@map("inventory_snapshot_line")
+}
+
+model SalesCard {
+  id        String         @id @default(cuid())
+  companyId String
+  userId    String
+  roleId    String
+  startAt   DateTime
+  endAt     DateTime?
+  status    SalesCardStatus @default(DRAFT)
+  note      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  company Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  role    CompanyRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  lines SalesCardLine[]
+
+  @@index([companyId, startAt])
+  @@index([companyId, userId, status])
+  @@index([roleId])
+  @@map("sales_card")
+}
+
+model SalesCardLine {
+  id           String  @id @default(cuid())
+  salesCardId  String
+  itemId       String
+  quantitySold Int
+  unitPrice    Decimal? @db.Decimal(10, 2)
+  total        Decimal? @db.Decimal(10, 2)
+
+  salesCard SalesCard @relation(fields: [salesCardId], references: [id], onDelete: Cascade)
+  item      Item      @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@unique([salesCardId, itemId])
+  @@index([itemId])
+  @@map("sales_card_line")
+}
+
+model Invite {
+  id          String      @id @default(cuid())
+  companyId   String
+  type        InviteType  @default(EMAIL_CODE)
+  status      InviteStatus @default(PENDING)
+  email       String
+  code        String
+  roleId      String
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  acceptedById String?
+
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  role      CompanyRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdBy User        @relation("InviteCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  acceptedBy User?      @relation("InviteAcceptedBy", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  @@unique([code])
+  @@index([companyId, status])
+  @@index([createdById])
+  @@map("invite")
 }
 
 model Session {
