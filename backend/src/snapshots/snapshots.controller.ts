@@ -3,12 +3,14 @@ import { Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
 import { SnapshotsService } from './snapshots.service';
+import { RequirePermissions } from '../auth/permissions.decorator';
 
 @Controller('companies/:companyId/snapshots')
 export class SnapshotsController {
   constructor(private readonly snapshotsService: SnapshotsService) {}
 
   @Post()
+  @RequirePermissions('inventory.snapshot.create')
   async createSnapshot(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -18,6 +20,7 @@ export class SnapshotsController {
   }
 
   @Get()
+  @RequirePermissions('inventory.read')
   async listSnapshots(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -26,6 +29,7 @@ export class SnapshotsController {
   }
 
   @Get(':snapshotId')
+  @RequirePermissions('inventory.read')
   async getSnapshot(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -34,4 +38,3 @@ export class SnapshotsController {
     return { data: await this.snapshotsService.getSnapshot(session.user.id, companyId, snapshotId) };
   }
 }
-
