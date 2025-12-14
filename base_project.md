@@ -355,8 +355,8 @@ You can store permissions as strings on `CompanyRole.permissions`:
 - `salesCards.create`
 - `salesCards.edit.ownDraft` (own card while `DRAFT`)
 - `salesCards.edit.anyUnlocked` (any card unless `LOCKED`)
-- `salesCards.lines.write` (edit item lines / quantities sold; affects inventory)
 - `salesCards.stop.ownDraft`
+- `salesCards.stop.anyDraft` (stop other users’ `DRAFT` cards)
 - `salesCards.lock`
 - `roles.manage` (create/rename roles, edit permissions)
 
@@ -370,7 +370,8 @@ You can store permissions as strings on `CompanyRole.permissions`:
 
 - If `salesCards.edit.ownDraft`: user can edit own card only while `DRAFT`.
 - If `salesCards.edit.anyUnlocked`: user can edit any card unless `LOCKED`.
-- If `salesCards.lines.write`: user can add/update `SalesCardLine` entries (quantities sold). Without it, line updates are rejected (or ignored) and the card will never affect inventory.
+- If `salesCards.stop.ownDraft`: user can stop (submit) own `DRAFT` card.
+- If `salesCards.stop.anyDraft`: user can stop (submit) other users’ `DRAFT` cards.
 - If `roles.manage`: user can manage roles/permissions (except removing `OWNER`).
 - `OWNER` implicitly has all permissions.
 

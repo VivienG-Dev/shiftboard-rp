@@ -37,6 +37,15 @@ For any route containing `:companyId`:
 - The backend recognizes a fixed set of permission keys (server-side allowlist).
 - Custom roles created in the admin UI can only grant permissions from that allowlist.
 
+### Permission allowlist (current)
+
+- Company: `company.read`, `company.update`, `company.archive`
+- Members: `members.read`, `members.invite`, `members.updateRole`
+- Roles: `roles.manage`
+- Inventory: `inventory.read`, `inventory.write`, `inventory.snapshot.create`
+- Shift cards: `salesCards.read`, `salesCards.create`, `salesCards.edit.ownDraft`, `salesCards.edit.anyUnlocked`, `salesCards.stop.ownDraft`, `salesCards.stop.anyDraft`, `salesCards.lock`
+- Stats: `stats.read`
+
 ### Status enums
 
 - Sales card: `DRAFT` → `SUBMITTED` → `LOCKED`
@@ -317,6 +326,24 @@ Accept an invite and create membership.
 { "data": { "companyId": "uuid", "roleId": "uuid" } }
 ```
 
+### GET `/companies/:companyId/me`
+
+Return the caller’s membership + assigned roles for a company (used to choose `activeRoleId` and show role dropdowns).
+
+**Auth**: any company member
+
+### PATCH `/companies/:companyId/me`
+
+Set `activeRoleId` (must be one of the roles assigned to the caller).
+
+**Auth**: any company member
+
+**Body**
+
+```json
+{ "activeRoleId": "uuid" }
+```
+
 ### POST `/companies/:companyId/members/:memberId/archive`
 
 Archive (remove) a member from company.
@@ -492,10 +519,12 @@ Computed current stock for all items.
     {
       "itemId": "uuid",
       "name": "Vodka",
+      "lowStockThreshold": 50,
       "baselineSnapshotId": "uuid",
-      "baselineQuantity": 12
+      "baselineQuantity": 12,
       "soldSinceBaseline": 5,
-      "currentStock": 7
+      "currentStock": 7,
+      "isLowStock": true
     }
   ]
 }
@@ -565,7 +594,6 @@ Edit an active card (note + lines).
 
 - `salesCards.edit.anyUnlocked`: any card unless `LOCKED`
 - `salesCards.edit.ownDraft`: own card while `DRAFT`
-- `salesCards.lines.write`: required to add/update item `lines` (quantities sold)
 - `OWNER`: always allowed
 
 **Body**
@@ -593,6 +621,7 @@ Submitted quantities are included in stock computation and reduce “current sto
 **Auth** (via permissions)
 
 - `salesCards.stop.ownDraft`: stop own `DRAFT`
+- `salesCards.stop.anyDraft`: stop others’ `DRAFT`
 - Optional: allow `salesCards.edit.anyUnlocked` to stop others’ `DRAFT` (decide later)
 - `OWNER`: always allowed
 
