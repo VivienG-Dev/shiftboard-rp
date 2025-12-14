@@ -77,7 +77,13 @@ export class ItemsService {
   async createItem(
     userId: string,
     companyId: string,
-    input: { name: string; category: ItemCategory; unit: string; basePrice?: number },
+    input: {
+      name: string;
+      category: ItemCategory;
+      unit: string;
+      basePrice?: number;
+      lowStockThreshold?: number;
+    },
   ) {
     await this.assertCompanyAccess(userId, companyId);
 
@@ -98,6 +104,7 @@ export class ItemsService {
           category: input.category,
           unit,
           basePrice: input.basePrice === undefined ? undefined : new Prisma.Decimal(String(input.basePrice)),
+          lowStockThreshold: input.lowStockThreshold,
         },
       });
     } catch (error) {
@@ -124,7 +131,14 @@ export class ItemsService {
     userId: string,
     companyId: string,
     itemId: string,
-    input: { name?: string; category?: ItemCategory; unit?: string; basePrice?: number | null; isActive?: boolean },
+    input: {
+      name?: string;
+      category?: ItemCategory;
+      unit?: string;
+      basePrice?: number | null;
+      lowStockThreshold?: number | null;
+      isActive?: boolean;
+    },
   ) {
     await this.assertCompanyAccess(userId, companyId);
 
@@ -158,6 +172,7 @@ export class ItemsService {
               : input.basePrice === null
                 ? null
                 : new Prisma.Decimal(String(input.basePrice)),
+          lowStockThreshold: input.lowStockThreshold,
         },
       });
     } catch (error) {

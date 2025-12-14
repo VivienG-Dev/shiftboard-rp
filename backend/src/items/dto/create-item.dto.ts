@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { ItemCategory } from '../../../generated/prisma/enums';
 
 export class CreateItemDto {
@@ -19,5 +19,9 @@ export class CreateItemDto {
   @IsNumber()
   @Min(0)
   basePrice?: number;
-}
 
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lowStockThreshold?: number;
+}

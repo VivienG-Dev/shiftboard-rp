@@ -5,12 +5,14 @@ import type { ItemCategory } from '../../generated/prisma/client';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
+import { RequirePermissions } from '../auth/permissions.decorator';
 
 @Controller('companies/:companyId/items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
   @Get()
+  @RequirePermissions('inventory.read')
   async listItems(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -30,6 +32,7 @@ export class ItemsController {
   }
 
   @Post()
+  @RequirePermissions('inventory.write')
   async createItem(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -39,6 +42,7 @@ export class ItemsController {
   }
 
   @Patch(':itemId')
+  @RequirePermissions('inventory.write')
   async updateItem(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -49,6 +53,7 @@ export class ItemsController {
   }
 
   @Post(':itemId/archive')
+  @RequirePermissions('inventory.write')
   async archiveItem(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
