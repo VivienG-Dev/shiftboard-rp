@@ -442,7 +442,18 @@ Create a snapshot.
 **Response**
 
 ```json
-{ "data": { "id": "uuid", "createdAt": "iso" } }
+{
+  "data": {
+    "id": "uuid",
+    "companyId": "uuid",
+    "createdById": "uuid",
+    "createdAt": "iso",
+    "note": "After restock",
+    "lines": [
+      { "id": "uuid", "snapshotId": "uuid", "itemId": "uuid", "quantity": 12, "item": { "id": "uuid", "name": "Vodka", "unit": "bottle", "category": "BOTTLE" } }
+    ]
+  }
+}
 ```
 
 ### GET `/companies/:companyId/snapshots`
@@ -450,6 +461,16 @@ Create a snapshot.
 List snapshots (latest first).
 
 **Auth**: membership required + `inventory.read` (or `OWNER`)
+
+**Response**
+
+```json
+{
+  "data": [
+    { "id": "uuid", "companyId": "uuid", "createdById": "uuid", "createdAt": "iso", "note": "After restock", "_count": { "lines": 12 } }
+  ]
+}
+```
 
 ### GET `/companies/:companyId/snapshots/:snapshotId`
 
