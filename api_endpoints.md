@@ -373,6 +373,7 @@ Query:
 
 - `category` optional (`DRINK|BOTTLE|FOOD|OTHER`)
 - `activeOnly` default `true`
+- `includeArchived` default `false` (set to `true` to include archived items; combine with `activeOnly=false` to list archives)
 - `search` optional
 
 ### POST `/companies/:companyId/items`
