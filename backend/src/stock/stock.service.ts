@@ -27,7 +27,7 @@ export class StockService {
 
     const items = await this.prisma.item.findMany({
       where: { companyId, archivedAt: null },
-      select: { id: true, name: true, unit: true, category: true },
+      select: { id: true, name: true, unit: true, category: true, lowStockThreshold: true },
       orderBy: { name: 'asc' },
     });
 
@@ -37,10 +37,15 @@ export class StockService {
         name: item.name,
         unit: item.unit,
         category: item.category,
+        lowStockThreshold: item.lowStockThreshold,
         baselineSnapshotId: null,
         baselineQuantity: 0,
         soldSinceBaseline: 0,
         currentStock: 0,
+        isLowStock:
+          item.lowStockThreshold === null || item.lowStockThreshold === undefined
+            ? false
+            : 0 < item.lowStockThreshold,
       }));
     }
 
@@ -68,17 +73,22 @@ export class StockService {
     return items.map((item) => {
       const baselineQuantity = baselineByItemId.get(item.id) ?? 0;
       const soldSinceBaseline = soldByItemId.get(item.id) ?? 0;
+      const currentStock = baselineQuantity - soldSinceBaseline;
       return {
         itemId: item.id,
         name: item.name,
         unit: item.unit,
         category: item.category,
+        lowStockThreshold: item.lowStockThreshold,
         baselineSnapshotId: latestSnapshot.id,
         baselineQuantity,
         soldSinceBaseline,
-        currentStock: baselineQuantity - soldSinceBaseline,
+        currentStock,
+        isLowStock:
+          item.lowStockThreshold === null || item.lowStockThreshold === undefined
+            ? false
+            : currentStock < item.lowStockThreshold,
       };
     });
   }
 }
-
