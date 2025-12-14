@@ -492,9 +492,10 @@ Computed current stock for all items.
     {
       "itemId": "uuid",
       "name": "Vodka",
-      "currentStock": 7,
       "baselineSnapshotId": "uuid",
       "baselineQuantity": 12
+      "soldSinceBaseline": 5,
+      "currentStock": 7
     }
   ]
 }
@@ -633,10 +634,11 @@ Query:
 ```json
 {
   "data": {
+    "from": "iso|null",
+    "to": "iso|null",
     "revenue": 12345,
-    "drinksSold": 321,
     "activeStaff": 4,
-    "lowStockCount": 7
+    "itemsSold": 321
   }
 }
 ```
