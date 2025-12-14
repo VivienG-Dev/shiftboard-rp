@@ -532,12 +532,13 @@ Start a shift card for current user.
 **Body** (optional)
 
 ```json
-{ "note": "string", "roleId": "uuid", "locationId": "optional-uuid", "startAt": "optional-iso" }
+{ "note": "string", "roleId": "optional-uuid", "locationId": "optional-uuid", "startAt": "optional-iso" }
 ```
 
 **Rules**
 
-- `roleId` must be one of the roles assigned to the user’s membership (`MembershipRole`).
+- If omitted, `roleId` defaults to the membership’s `activeRoleId`.
+- `roleId` must be one of the roles assigned to the user’s membership (`MembershipRole`) (or the `activeRoleId`).
 - `locationId` (if provided) must belong to the company (and not be archived).
 
 **Response**
