@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { Prisma } from '../../generated/prisma/client';
 import type { SalesCardStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import type { PermissionKey } from '../auth/permissions';
 
 function parseOptionalIsoDate(input?: string) {
   if (!input) return undefined;
@@ -19,7 +20,9 @@ export class SalesCardsService {
       where: { userId, companyId, archivedAt: null },
       include: {
         company: true,
-        membershipRoles: { select: { roleId: true } },
+        membershipRoles: {
+          include: { role: { select: { id: true, permissions: true, archivedAt: true } } },
+        },
       },
     });
 
@@ -28,6 +31,35 @@ export class SalesCardsService {
     }
 
     return membership;
+  }
+
+  private async hasPermission(
+    userId: string,
+    companyId: string,
+    membership: Awaited<ReturnType<SalesCardsService['assertCompanyAccess']>>,
+    permission: PermissionKey,
+  ) {
+    if (membership.company.ownerId === userId) return true;
+
+    const permissions = new Set<string>();
+    for (const mr of membership.membershipRoles) {
+      if (!mr.role.archivedAt) {
+        for (const p of mr.role.permissions ?? []) permissions.add(p);
+      }
+    }
+
+    if (
+      membership.activeRoleId &&
+      !membership.membershipRoles.some((mr) => mr.role.id === membership.activeRoleId)
+    ) {
+      const activeRole = await this.prisma.companyRole.findFirst({
+        where: { id: membership.activeRoleId, companyId, archivedAt: null },
+        select: { permissions: true },
+      });
+      for (const p of activeRole?.permissions ?? []) permissions.add(p);
+    }
+
+    return permissions.has(permission);
   }
 
   async listSalesCards(
@@ -71,7 +103,7 @@ export class SalesCardsService {
       throw new BadRequestException('roleId is required (or set an active role)');
     }
 
-    const allowedRoleIds = new Set(membership.membershipRoles.map((r) => r.roleId));
+    const allowedRoleIds = new Set(membership.membershipRoles.map((r) => r.role.id));
     if (membership.activeRoleId) {
       allowedRoleIds.add(membership.activeRoleId);
     }
@@ -135,7 +167,7 @@ export class SalesCardsService {
     cardId: string,
     input: { note?: string; lines?: { itemId: string; quantitySold: number }[] },
   ) {
-    await this.assertCompanyAccess(userId, companyId);
+    const membership = await this.assertCompanyAccess(userId, companyId);
 
     const card = await this.prisma.salesCard.findFirst({
       where: { id: cardId, companyId },
@@ -144,11 +176,21 @@ export class SalesCardsService {
     if (!card) {
       throw new NotFoundException('Sales card not found');
     }
-    if (card.userId !== userId) {
-      throw new ForbiddenException('You can only edit your own sales card');
+    const isOwnerOfCard = card.userId === userId;
+    if (!isOwnerOfCard) {
+      const canEditAny = await this.hasPermission(
+        userId,
+        companyId,
+        membership,
+        'salesCards.edit.anyUnlocked',
+      );
+      if (!canEditAny) throw new ForbiddenException('You can only edit your own sales card');
     }
-    if (card.status !== 'DRAFT') {
-      throw new BadRequestException('Only DRAFT cards can be edited');
+    if (card.status === 'LOCKED') {
+      throw new BadRequestException('LOCKED cards cannot be edited');
+    }
+    if (card.status !== 'DRAFT' && isOwnerOfCard) {
+      throw new BadRequestException('Only DRAFT cards can be edited by the card owner');
     }
 
     const note = input.note === undefined ? undefined : input.note.trim() || undefined;
@@ -233,7 +275,7 @@ export class SalesCardsService {
     cardId: string,
     input: { endAt?: string },
   ) {
-    await this.assertCompanyAccess(userId, companyId);
+    const membership = await this.assertCompanyAccess(userId, companyId);
 
     const card = await this.prisma.salesCard.findFirst({
       where: { id: cardId, companyId },
@@ -243,7 +285,13 @@ export class SalesCardsService {
       throw new NotFoundException('Sales card not found');
     }
     if (card.userId !== userId) {
-      throw new ForbiddenException('You can only stop your own sales card');
+      const canStopAny = await this.hasPermission(
+        userId,
+        companyId,
+        membership,
+        'salesCards.stop.anyDraft',
+      );
+      if (!canStopAny) throw new ForbiddenException('You can only stop your own sales card');
     }
     if (card.status !== 'DRAFT') {
       throw new BadRequestException('Only DRAFT cards can be stopped');

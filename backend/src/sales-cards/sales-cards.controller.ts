@@ -6,12 +6,14 @@ import { StartSalesCardDto } from './dto/start-sales-card.dto';
 import { StopSalesCardDto } from './dto/stop-sales-card.dto';
 import { UpdateSalesCardDto } from './dto/update-sales-card.dto';
 import { SalesCardsService } from './sales-cards.service';
+import { RequireAnyPermissions, RequirePermissions } from '../auth/permissions.decorator';
 
 @Controller('companies/:companyId/sales-cards')
 export class SalesCardsController {
   constructor(private readonly salesCardsService: SalesCardsService) {}
 
   @Get()
+  @RequirePermissions('salesCards.read')
   async listSalesCards(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -27,6 +29,7 @@ export class SalesCardsController {
   }
 
   @Post('start')
+  @RequirePermissions('salesCards.create')
   async startSalesCard(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -36,6 +39,7 @@ export class SalesCardsController {
   }
 
   @Get(':cardId')
+  @RequirePermissions('salesCards.read')
   async getSalesCard(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -45,6 +49,7 @@ export class SalesCardsController {
   }
 
   @Patch(':cardId')
+  @RequireAnyPermissions('salesCards.edit.ownDraft', 'salesCards.edit.anyUnlocked')
   async updateSalesCard(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -55,6 +60,7 @@ export class SalesCardsController {
   }
 
   @Post(':cardId/stop')
+  @RequireAnyPermissions('salesCards.stop.ownDraft', 'salesCards.stop.anyDraft')
   async stopSalesCard(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
@@ -64,4 +70,3 @@ export class SalesCardsController {
     return { data: await this.salesCardsService.stopSalesCard(session.user.id, companyId, cardId, body) };
   }
 }
-
