@@ -1,5 +1,5 @@
 import {
-  ArrayMinSize,
+  ArrayMaxSize,
   IsArray,
   IsInt,
   IsNotEmpty,
@@ -11,25 +11,26 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class CreateSnapshotLineDto {
+class UpdateSalesCardLineDto {
   @IsString()
   @IsNotEmpty()
   itemId!: string;
 
   @IsInt()
   @Min(0)
-  quantity!: number;
+  quantitySold!: number;
 }
 
-export class CreateSnapshotDto {
+export class UpdateSalesCardDto {
   @IsOptional()
   @IsString()
   @MaxLength(500)
   note?: string;
 
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
+  @ArrayMaxSize(500)
   @ValidateNested({ each: true })
-  @Type(() => CreateSnapshotLineDto)
-  lines!: CreateSnapshotLineDto[];
+  @Type(() => UpdateSalesCardLineDto)
+  lines?: UpdateSalesCardLineDto[];
 }
