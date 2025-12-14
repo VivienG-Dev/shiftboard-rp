@@ -7,9 +7,17 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CompaniesModule } from './companies/companies.module';
 import { ItemsModule } from './items/items.module';
+import { SnapshotsModule } from './snapshots/snapshots.module';
 
 @Module({
-  imports: [AuthModule.forRoot({ auth }), PrismaModule, UserModule, CompaniesModule, ItemsModule],
+  imports: [
+    AuthModule.forRoot({ auth }),
+    PrismaModule,
+    UserModule,
+    CompaniesModule,
+    ItemsModule,
+    SnapshotsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
