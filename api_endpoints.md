@@ -265,13 +265,31 @@ List members and roles.
 
 Change role.
 
-**Auth**: `members.updateRole` (or `OWNER`); cannot demote/remove `OWNER`
+**Auth**: owner-only (MVP)
+
+**Body**
+
+```json
+{ "activeRoleId": "uuid" }
+```
+
+### POST `/companies/:companyId/members/:memberId/roles`
+
+Assign an additional role to a member.
+
+**Auth**: owner-only (MVP)
 
 **Body**
 
 ```json
 { "roleId": "uuid" }
 ```
+
+### DELETE `/companies/:companyId/members/:memberId/roles/:roleId`
+
+Remove a role from a member.
+
+**Auth**: owner-only (MVP)
 
 ### POST `/companies/:companyId/invites`
 
@@ -348,7 +366,7 @@ Set `activeRoleId` (must be one of the roles assigned to the caller).
 
 Archive (remove) a member from company.
 
-**Auth**: `members.updateRole` (or `OWNER`); cannot remove `OWNER`
+**Auth**: owner-only (MVP); cannot remove `OWNER`
 
 ---
 
