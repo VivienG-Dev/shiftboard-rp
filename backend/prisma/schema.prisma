@@ -102,6 +102,7 @@ model CompanyLocation {
   archivedAt DateTime?
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  salesCards SalesCard[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -220,6 +221,7 @@ model InventorySnapshotLine {
 model SalesCard {
   id        String         @id @default(cuid())
   companyId String
+  locationId String?
   userId    String
   roleId    String
   startAt   DateTime
@@ -230,6 +232,7 @@ model SalesCard {
   updatedAt DateTime       @updatedAt
 
   company Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  location CompanyLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
   user    User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   role    CompanyRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
@@ -238,6 +241,7 @@ model SalesCard {
   @@index([companyId, startAt])
   @@index([companyId, userId, status])
   @@index([roleId])
+  @@index([locationId])
   @@map("sales_card")
 }
 
