@@ -23,6 +23,8 @@ enum CompanyType {
 
 enum ItemCategory {
   DRINK
+  SOFT_DRINK
+  ALCOHOL_DRINK
   BOTTLE
   FOOD
   OTHER
