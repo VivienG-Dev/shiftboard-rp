@@ -60,6 +60,7 @@ model User {
   ownedCompanies           Company[]           @relation("CompanyOwner")
   memberships             Membership[]
   inventorySnapshotsCreated InventorySnapshot[] @relation("InventorySnapshotCreatedBy")
+  restocksCreated          Restock[]           @relation("RestockCreatedBy")
   salesCards              SalesCard[]
   invitesCreated          Invite[]            @relation("InviteCreatedBy")
   invitesAccepted         Invite[]            @relation("InviteAcceptedBy")
@@ -83,6 +84,7 @@ model Company {
   roles              CompanyRole[]
   items              Item[]
   inventorySnapshots InventorySnapshot[]
+  restocks          Restock[]
   salesCards         SalesCard[]
   invites            Invite[]
   locations          CompanyLocation[]
@@ -181,6 +183,7 @@ model Item {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   inventorySnapshotLines InventorySnapshotLine[]
+  restockLines           RestockLine[]
   salesCardLines         SalesCardLine[]
 
   @@unique([companyId, name])
@@ -217,6 +220,37 @@ model InventorySnapshotLine {
   @@unique([snapshotId, itemId])
   @@index([itemId])
   @@map("inventory_snapshot_line")
+}
+
+model Restock {
+  id          String   @id @default(cuid())
+  companyId   String
+  createdById String
+  createdAt   DateTime @default(now())
+  note        String?
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("RestockCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  lines RestockLine[]
+
+  @@index([companyId, createdAt])
+  @@index([createdById])
+  @@map("restock")
+}
+
+model RestockLine {
+  id        String @id @default(cuid())
+  restockId String
+  itemId    String
+  quantityAdded Int
+
+  restock Restock @relation(fields: [restockId], references: [id], onDelete: Cascade)
+  item    Item    @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@unique([restockId, itemId])
+  @@index([itemId])
+  @@map("restock_line")
 }
 
 model SalesCard {
