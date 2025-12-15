@@ -463,8 +463,10 @@ Snapshots are **full stock‑takes**. Latest snapshot is baseline for current st
 
 - We do **not** store a separate “stock movement” row per sale for MVP.
 - Instead, stock is **derived** as:  
-  `currentStock = latestSnapshot.quantity - sum(quantitySold after snapshot)`  
-  So every submitted/locked sales card automatically reduces computed stock.
+  `currentStock = latestSnapshot.quantity - soldSinceBaseline + restockedSinceBaseline`
+  - `soldSinceBaseline` = sum of `SalesCardLine.quantitySold` for cards in `SUBMITTED|LOCKED` with `startAt >= latestSnapshot.createdAt`
+  - `restockedSinceBaseline` = sum of `RestockLine.quantityAdded` for restocks with `createdAt >= latestSnapshot.createdAt`
+  So every submitted/locked sales card reduces computed stock, and every restock increases it.
 
 ### POST `/companies/:companyId/snapshots`
 
@@ -523,6 +525,93 @@ Snapshot detail with lines.
 
 **Auth**: membership required + `inventory.read` (or `OWNER`)
 
+---
+
+## 5.5 Restocks
+
+Restocks are additive inventory movements (e.g. deliveries, supply runs).
+
+### POST `/companies/:companyId/restocks`
+
+Create a restock.
+
+**Auth**: `inventory.write` (or `OWNER`)
+
+**Body**
+
+```json
+{
+  "note": "Delivered by supplier",
+  "lines": [
+    { "itemId": "uuid", "quantityAdded": 12 },
+    { "itemId": "uuid", "quantityAdded": 4 }
+  ]
+}
+```
+
+**Rules**
+
+- `lines` must contain at least 1 entry
+- `quantityAdded` must be an integer >= 1
+- each `itemId` must exist in the company and be active (not archived)
+- duplicate `itemId` in `lines` is rejected
+
+**Response**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "companyId": "uuid",
+    "createdById": "uuid",
+    "createdAt": "iso",
+    "note": "Delivered by supplier",
+    "lines": [
+      {
+        "id": "uuid",
+        "restockId": "uuid",
+        "itemId": "uuid",
+        "quantityAdded": 12,
+        "item": { "id": "uuid", "name": "Vodka", "unit": "bottle", "category": "BOTTLE" }
+      }
+    ]
+  }
+}
+```
+
+### GET `/companies/:companyId/restocks`
+
+List restocks (latest first).
+
+**Auth**: membership required + `inventory.read` (or `OWNER`)
+
+**Response**
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "companyId": "uuid",
+      "createdById": "uuid",
+      "createdAt": "iso",
+      "note": "Delivered by supplier",
+      "_count": { "lines": 2 }
+    }
+  ]
+}
+```
+
+### GET `/companies/:companyId/restocks/:restockId`
+
+Restock detail with lines.
+
+**Auth**: membership required + `inventory.read` (or `OWNER`)
+
+---
+
+## 5.6 Stock
+
 ### GET `/companies/:companyId/stock`
 
 Computed current stock for all items.
@@ -537,11 +626,14 @@ Computed current stock for all items.
     {
       "itemId": "uuid",
       "name": "Vodka",
+      "unit": "bottle",
+      "category": "BOTTLE",
       "lowStockThreshold": 50,
       "baselineSnapshotId": "uuid",
       "baselineQuantity": 12,
       "soldSinceBaseline": 5,
-      "currentStock": 7,
+      "restockedSinceBaseline": 2,
+      "currentStock": 9,
       "isLowStock": true
     }
   ]

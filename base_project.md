@@ -34,6 +34,7 @@ The goal is to provide a simple, stylish, RP-friendly dashboard to track stocks,
 - CRUD for items (drinks, food, bottles…)
 - Categories, units, prices
 - Stock tracking with snapshots
+- Restock entries (additive stock movements)
 - Low-stock detection
 
 ### Shift Cards (Sales Reports)
@@ -234,6 +235,21 @@ Allows a single user to have **multiple roles** inside the same company (e.g., b
 - `itemId`
 - `quantity`
 
+#### Restock
+
+- `id`
+- `companyId`
+- `createdAt`
+- `createdById`
+- `note` (optional)
+
+#### RestockLine
+
+- `id`
+- `restockId`
+- `itemId`
+- `quantityAdded`
+
 ### Shift Cards
 
 #### SalesCard (Shift Report)
@@ -330,6 +346,8 @@ These are the “set in stone” rules for the MVP unless changed later.
 - “Current stock” for an item is:
   - `latestSnapshot.quantity`
   - minus `sum(quantitySold)` from all `SalesCardLine`s **after** that snapshot’s `createdAt`.
+- Restocks after the baseline snapshot are additive:
+  - plus `sum(quantityAdded)` from all `RestockLine`s **after** that snapshot’s `createdAt`.
 - If an item has no snapshot yet, current stock is `0` until the first count.
 
 ## 5. Permission Rules
