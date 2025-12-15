@@ -12,17 +12,18 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CompanyMembersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async assertOwner(userId: string, companyId: string) {
-    const company = await this.prisma.company.findFirst({
-      where: { id: companyId, archivedAt: null },
-      select: { ownerId: true },
+  private async assertCompanyAccess(userId: string, companyId: string) {
+    const membership = await this.prisma.membership.findFirst({
+      where: { userId, companyId, archivedAt: null },
+      include: { company: { select: { archivedAt: true } } },
     });
-    if (!company) throw new NotFoundException('Company not found');
-    if (company.ownerId !== userId) throw new ForbiddenException('Only the owner can manage members right now');
+    if (!membership || membership.company.archivedAt) {
+      throw new ForbiddenException('No access to this company');
+    }
   }
 
   async listMembers(ownerId: string, companyId: string) {
-    await this.assertOwner(ownerId, companyId);
+    await this.assertCompanyAccess(ownerId, companyId);
 
     const memberships = await this.prisma.membership.findMany({
       where: { companyId, archivedAt: null },
@@ -49,7 +50,7 @@ export class CompanyMembersService {
   }
 
   async updateMember(ownerId: string, companyId: string, membershipId: string, input: { activeRoleId?: string }) {
-    await this.assertOwner(ownerId, companyId);
+    await this.assertCompanyAccess(ownerId, companyId);
 
     const membership = await this.prisma.membership.findFirst({
       where: { id: membershipId, companyId, archivedAt: null },
@@ -74,7 +75,7 @@ export class CompanyMembersService {
   }
 
   async addMemberRole(ownerId: string, companyId: string, membershipId: string, roleId: string) {
-    await this.assertOwner(ownerId, companyId);
+    await this.assertCompanyAccess(ownerId, companyId);
 
     const membership = await this.prisma.membership.findFirst({
       where: { id: membershipId, companyId, archivedAt: null },
@@ -117,7 +118,7 @@ export class CompanyMembersService {
   }
 
   async removeMemberRole(ownerId: string, companyId: string, membershipId: string, roleId: string) {
-    await this.assertOwner(ownerId, companyId);
+    await this.assertCompanyAccess(ownerId, companyId);
 
     const membership = await this.prisma.membership.findFirst({
       where: { id: membershipId, companyId, archivedAt: null },
@@ -160,7 +161,7 @@ export class CompanyMembersService {
   }
 
   async archiveMember(ownerId: string, companyId: string, membershipId: string) {
-    await this.assertOwner(ownerId, companyId);
+    await this.assertCompanyAccess(ownerId, companyId);
 
     const membership = await this.prisma.membership.findFirst({
       where: { id: membershipId, companyId, archivedAt: null },
@@ -182,4 +183,3 @@ export class CompanyMembersService {
     });
   }
 }
-
