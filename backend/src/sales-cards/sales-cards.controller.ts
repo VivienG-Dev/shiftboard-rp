@@ -28,6 +28,15 @@ export class SalesCardsController {
     };
   }
 
+  @Get('active')
+  @RequirePermissions('salesCards.read')
+  async getActiveSalesCard(
+    @Session() session: UserSession,
+    @Param('companyId') companyId: string,
+  ) {
+    return { data: await this.salesCardsService.getActiveSalesCard(session.user.id, companyId) };
+  }
+
   @Post('start')
   @RequirePermissions('salesCards.create')
   async startSalesCard(
@@ -68,5 +77,15 @@ export class SalesCardsController {
     @Body() body: StopSalesCardDto,
   ) {
     return { data: await this.salesCardsService.stopSalesCard(session.user.id, companyId, cardId, body) };
+  }
+
+  @Post(':cardId/lock')
+  @RequirePermissions('salesCards.lock')
+  async lockSalesCard(
+    @Session() session: UserSession,
+    @Param('companyId') companyId: string,
+    @Param('cardId') cardId: string,
+  ) {
+    return { data: await this.salesCardsService.lockSalesCard(session.user.id, companyId, cardId) };
   }
 }

@@ -161,6 +161,22 @@ export class SalesCardsService {
     return card;
   }
 
+  async getActiveSalesCard(userId: string, companyId: string) {
+    await this.assertCompanyAccess(userId, companyId);
+
+    return this.prisma.salesCard.findFirst({
+      where: { companyId, userId, status: 'DRAFT' },
+      orderBy: { startAt: 'desc' },
+      include: {
+        location: { select: { id: true, name: true } },
+        lines: {
+          orderBy: { item: { name: 'asc' } },
+          include: { item: { select: { id: true, name: true, unit: true, category: true } } },
+        },
+      },
+    });
+  }
+
   async updateSalesCard(
     userId: string,
     companyId: string,
@@ -338,6 +354,33 @@ export class SalesCardsService {
           },
         },
       });
+    });
+  }
+
+  async lockSalesCard(userId: string, companyId: string, cardId: string) {
+    await this.assertCompanyAccess(userId, companyId);
+
+    const card = await this.prisma.salesCard.findFirst({
+      where: { id: cardId, companyId },
+      select: { id: true, status: true },
+    });
+    if (!card) {
+      throw new NotFoundException('Sales card not found');
+    }
+    if (card.status !== 'SUBMITTED') {
+      throw new BadRequestException('Only SUBMITTED cards can be locked');
+    }
+
+    return this.prisma.salesCard.update({
+      where: { id: card.id },
+      data: { status: 'LOCKED' },
+      include: {
+        location: { select: { id: true, name: true } },
+        lines: {
+          orderBy: { item: { name: 'asc' } },
+          include: { item: { select: { id: true, name: true, unit: true, category: true } } },
+        },
+      },
     });
   }
 }
