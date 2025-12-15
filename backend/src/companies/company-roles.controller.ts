@@ -50,4 +50,3 @@ export class CompanyRolesController {
     return { data: await this.rolesService.archiveRole(session.user.id, companyId, roleId) };
   }
 }
-

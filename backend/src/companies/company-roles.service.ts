@@ -17,19 +17,18 @@ function slugifyKey(input: string) {
 export class CompanyRolesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async assertOwner(userId: string, companyId: string) {
-    const company = await this.prisma.company.findFirst({
-      where: { id: companyId, archivedAt: null },
-      select: { ownerId: true },
+  private async assertCompanyAccess(userId: string, companyId: string) {
+    const membership = await this.prisma.membership.findFirst({
+      where: { userId, companyId, archivedAt: null },
+      include: { company: { select: { archivedAt: true } } },
     });
-    if (!company) throw new NotFoundException('Company not found');
-    if (company.ownerId !== userId) {
-      throw new ForbiddenException('Only the owner can manage roles right now');
+    if (!membership || membership.company.archivedAt) {
+      throw new ForbiddenException('No access to this company');
     }
   }
 
   async listRoles(userId: string, companyId: string) {
-    await this.assertOwner(userId, companyId);
+    await this.assertCompanyAccess(userId, companyId);
     return this.prisma.companyRole.findMany({
       where: { companyId, archivedAt: null },
       orderBy: [{ isSystem: 'desc' }, { createdAt: 'asc' }],
@@ -41,7 +40,7 @@ export class CompanyRolesService {
     companyId: string,
     input: { name: string; key?: string; permissions?: string[] },
   ) {
-    await this.assertOwner(userId, companyId);
+    await this.assertCompanyAccess(userId, companyId);
 
     const name = input.name?.trim();
     if (!name) throw new BadRequestException('Role name is required');
@@ -75,7 +74,7 @@ export class CompanyRolesService {
     roleId: string,
     input: { name?: string; permissions?: string[] },
   ) {
-    await this.assertOwner(userId, companyId);
+    await this.assertCompanyAccess(userId, companyId);
 
     const role = await this.prisma.companyRole.findFirst({
       where: { id: roleId, companyId, archivedAt: null },
@@ -103,7 +102,7 @@ export class CompanyRolesService {
   }
 
   async archiveRole(userId: string, companyId: string, roleId: string) {
-    await this.assertOwner(userId, companyId);
+    await this.assertCompanyAccess(userId, companyId);
 
     const role = await this.prisma.companyRole.findFirst({
       where: { id: roleId, companyId, archivedAt: null },
@@ -118,4 +117,3 @@ export class CompanyRolesService {
     });
   }
 }
-
