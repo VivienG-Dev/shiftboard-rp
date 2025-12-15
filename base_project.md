@@ -248,6 +248,12 @@ Allows a single user to have **multiple roles** inside the same company (e.g., b
 - `status` (`DRAFT`, `SUBMITTED`, `LOCKED`)
 - `note`
 
+**Workflow**
+
+- `DRAFT`: staff is still working; lines can be edited.
+- `SUBMITTED`: shift ended; totals/prices are frozen (but admin can still review/edit if you allow it).
+- `LOCKED`: finalized; immutable for everyone.
+
 #### SalesCardLine
 
 - `id`

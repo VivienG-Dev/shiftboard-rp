@@ -265,7 +265,7 @@ List members and roles.
 
 Change role.
 
-**Auth**: owner-only (MVP)
+**Auth**: `members.updateRole` (or `OWNER`)
 
 **Body**
 
@@ -277,7 +277,7 @@ Change role.
 
 Assign an additional role to a member.
 
-**Auth**: owner-only (MVP)
+**Auth**: `members.updateRole` (or `OWNER`)
 
 **Body**
 
@@ -289,7 +289,7 @@ Assign an additional role to a member.
 
 Remove a role from a member.
 
-**Auth**: owner-only (MVP)
+**Auth**: `members.updateRole` (or `OWNER`)
 
 ### POST `/companies/:companyId/invites`
 
@@ -366,7 +366,7 @@ Set `activeRoleId` (must be one of the roles assigned to the caller).
 
 Archive (remove) a member from company.
 
-**Auth**: owner-only (MVP); cannot remove `OWNER`
+**Auth**: `members.updateRole` (or `OWNER`); cannot remove `OWNER`
 
 ---
 
@@ -570,6 +570,12 @@ Query:
 - `from` / `to` (iso date/time)
 - `status`
 - `userId`
+
+### GET `/companies/:companyId/sales-cards/active`
+
+Return the caller’s current active (`DRAFT`) shift card (or `null` if none).
+
+**Auth**: membership required + `salesCards.read` (or `OWNER`)
 
 ### POST `/companies/:companyId/sales-cards/start`
 
