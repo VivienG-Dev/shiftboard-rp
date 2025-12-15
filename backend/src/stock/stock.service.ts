@@ -41,6 +41,7 @@ export class StockService {
         baselineSnapshotId: null,
         baselineQuantity: 0,
         soldSinceBaseline: 0,
+        restockedSinceBaseline: 0,
         currentStock: 0,
         isLowStock:
           item.lowStockThreshold === null || item.lowStockThreshold === undefined
@@ -70,10 +71,28 @@ export class StockService {
       soldByItemId.set(line.itemId, (soldByItemId.get(line.itemId) ?? 0) + line.quantitySold);
     }
 
+    const restockLines = await this.prisma.restockLine.findMany({
+      where: {
+        restock: {
+          companyId,
+          createdAt: { gte: latestSnapshot.createdAt },
+        },
+      },
+      select: { itemId: true, quantityAdded: true },
+    });
+    const restockedByItemId = new Map<string, number>();
+    for (const line of restockLines) {
+      restockedByItemId.set(
+        line.itemId,
+        (restockedByItemId.get(line.itemId) ?? 0) + line.quantityAdded,
+      );
+    }
+
     return items.map((item) => {
       const baselineQuantity = baselineByItemId.get(item.id) ?? 0;
       const soldSinceBaseline = soldByItemId.get(item.id) ?? 0;
-      const currentStock = baselineQuantity - soldSinceBaseline;
+      const restockedSinceBaseline = restockedByItemId.get(item.id) ?? 0;
+      const currentStock = baselineQuantity - soldSinceBaseline + restockedSinceBaseline;
       return {
         itemId: item.id,
         name: item.name,
@@ -83,6 +102,7 @@ export class StockService {
         baselineSnapshotId: latestSnapshot.id,
         baselineQuantity,
         soldSinceBaseline,
+        restockedSinceBaseline,
         currentStock,
         isLowStock:
           item.lowStockThreshold === null || item.lowStockThreshold === undefined
