@@ -36,4 +36,3 @@ export class InvitesController {
     return { data: await this.invitesService.acceptInvite(session.user.id, session.user.email, code) };
   }
 }
-

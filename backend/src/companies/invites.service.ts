@@ -21,14 +21,13 @@ function generateInviteCode(length = 6) {
 export class InvitesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async assertOwner(userId: string, companyId: string) {
-    const company = await this.prisma.company.findFirst({
-      where: { id: companyId, archivedAt: null },
-      select: { ownerId: true },
+  private async assertCompanyAccess(userId: string, companyId: string) {
+    const membership = await this.prisma.membership.findFirst({
+      where: { userId, companyId, archivedAt: null },
+      include: { company: { select: { archivedAt: true } } },
     });
-    if (!company) throw new NotFoundException('Company not found');
-    if (company.ownerId !== userId) {
-      throw new ForbiddenException('Only the owner can manage invites right now');
+    if (!membership || membership.company.archivedAt) {
+      throw new ForbiddenException('No access to this company');
     }
   }
 
@@ -37,7 +36,7 @@ export class InvitesService {
     companyId: string,
     input: { email: string; roleId: string; expiresInHours?: number },
   ) {
-    await this.assertOwner(userId, companyId);
+    await this.assertCompanyAccess(userId, companyId);
 
     const email = input.email.trim().toLowerCase();
     const roleId = input.roleId.trim();
@@ -78,7 +77,7 @@ export class InvitesService {
   }
 
   async listInvites(userId: string, companyId: string) {
-    await this.assertOwner(userId, companyId);
+    await this.assertCompanyAccess(userId, companyId);
     return this.prisma.invite.findMany({
       where: { companyId },
       orderBy: { createdAt: 'desc' },
@@ -133,4 +132,3 @@ export class InvitesService {
     });
   }
 }
-
