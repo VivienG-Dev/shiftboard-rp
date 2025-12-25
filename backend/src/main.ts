@@ -10,6 +10,22 @@ async function bootstrap() {
     bodyParser: false, // Required for Better Auth
   });
 
+  const trustedOrigins =
+    process.env.TRUSTED_ORIGINS?.split(',')
+      .map((v) => v.trim())
+      .filter(Boolean) ?? [];
+
+  app.enableCors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (trustedOrigins.length === 0) return callback(null, true);
+      return callback(null, trustedOrigins.includes(origin));
+    },
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   const basePath = auth.options.basePath ?? '/api/auth';
   app.getHttpAdapter().getInstance().use(basePath, toNodeHandler(auth));
 
