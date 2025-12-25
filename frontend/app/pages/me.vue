@@ -3,6 +3,7 @@ import { useAuth } from "~/composables/useAuth";
 
 definePageMeta({
   middleware: "auth",
+  ssr: false,
 });
 
 const { session } = useAuth();
