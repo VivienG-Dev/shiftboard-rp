@@ -84,6 +84,12 @@ Meta:
 
 ## 1. Auth
 
+Note: this repo currently uses **Better Auth** mounted at `backend/lib/auth.ts` with `basePath: /api/auth`.
+So the working auth routes are Better Auth routes like:
+- `POST /api/auth/sign-in/email`
+- `GET /api/auth/get-session`
+- `POST /api/auth/sign-out`
+
 ### POST `/auth/register`
 
 Create a user account.
