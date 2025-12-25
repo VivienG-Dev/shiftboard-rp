@@ -17,9 +17,15 @@ export function useAuth() {
   const session = useState<BetterAuthSession>("auth.session", () => null);
   const sessionPending = useState<boolean>("auth.sessionPending", () => false);
 
+  // On SSR, forward cookies so `/get-session` can authenticate the request.
+  const requestHeaders = import.meta.server
+    ? useRequestHeaders(["cookie", "user-agent"])
+    : undefined;
+
   const authFetch = $fetch.create({
     baseURL: `${backendUrl}${authBasePath}`,
     credentials: "include",
+    headers: requestHeaders,
   });
 
   const isAuthenticated = computed(() => Boolean(session.value?.user));
