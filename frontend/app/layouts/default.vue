@@ -1,6 +1,8 @@
 <template>
   <div class="min-h-screen">
-    <NuxtPage />
+    <div class="pb-16">
+      <NuxtPage />
+    </div>
+    <AppFooter />
   </div>
 </template>
-
