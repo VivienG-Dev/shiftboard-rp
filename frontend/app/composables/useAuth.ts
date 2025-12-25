@@ -4,6 +4,7 @@ type BetterAuthSession = {
 } | null;
 
 type SignInEmailResult = unknown;
+type SignUpEmailResult = unknown;
 
 export function useAuth() {
   const runtimeConfig = useRuntimeConfig();
@@ -50,6 +51,15 @@ export function useAuth() {
     return result;
   }
 
+  async function signUpEmail(name: string, email: string, password: string) {
+    const result = await authFetch<SignUpEmailResult>("sign-up/email", {
+      method: "POST",
+      body: { name, email, password },
+    });
+    await refreshSession();
+    return result;
+  }
+
   async function signOut() {
     await authFetch("sign-out", { method: "POST" });
     session.value = null;
@@ -61,6 +71,7 @@ export function useAuth() {
     isAuthenticated,
     refreshSession,
     signInEmail,
+    signUpEmail,
     signOut,
   };
 }
