@@ -796,9 +796,85 @@ Query:
 
 ### GET `/companies/:companyId/charts/sales-by-hour`
 
-Sales histogram for range.
+Sales histogram for range, bucketed per hour (0–23).
 
 **Auth**: membership required + `stats.read` (or `OWNER`)
+
+Query:
+
+- `from` / `to` (iso)
+- `tzOffsetMinutes` (optional integer; defaults to `0`)
+  - Use this to render charts in a specific timezone without the backend needing DB timezone features.
+  - Example: Paris winter = `60`, Paris summer = `120`.
+
+**Response**
+
+```json
+{
+  "data": [
+    { "hour": 0, "revenue": 0, "itemsSold": 0 },
+    { "hour": 1, "revenue": 1200, "itemsSold": 8 }
+  ]
+}
+```
+
+### GET `/companies/:companyId/charts/sales-by-day`
+
+Sales aggregation by day (`YYYY-MM-DD`), zero-filled for missing days in the range.
+
+**Auth**: membership required + `stats.read` (or `OWNER`)
+
+Query:
+
+- `from` / `to` (iso)
+- `tzOffsetMinutes` (optional integer; defaults to `0`)
+
+**Response**
+
+```json
+{
+  "data": [
+    { "day": "2025-12-01", "revenue": 2400, "itemsSold": 15 },
+    { "day": "2025-12-02", "revenue": 0, "itemsSold": 0 }
+  ]
+}
+```
+
+### GET `/companies/:companyId/charts/sales-by-month`
+
+Sales aggregation by month (`YYYY-MM`), zero-filled for missing months in the range.
+
+**Auth**: membership required + `stats.read` (or `OWNER`)
+
+Query:
+
+- `from` / `to` (iso)
+- `tzOffsetMinutes` (optional integer; defaults to `0`)
+
+**Response**
+
+```json
+{
+  "data": [
+    { "month": "2025-01", "revenue": 81200, "itemsSold": 540 },
+    { "month": "2025-02", "revenue": 91300, "itemsSold": 604 }
+  ]
+}
+```
+
+### GET `/companies/:companyId/charts/sales`
+
+Single endpoint variant. Choose the bucket via query param.
+
+**Auth**: membership required + `stats.read` (or `OWNER`)
+
+Query:
+
+- `bucket` = `hour|day|month` (default `hour`)
+- `from` / `to` (iso)
+- `tzOffsetMinutes` (optional integer; defaults to `0`)
+
+**Response**: same shape as the corresponding endpoint (`sales-by-hour`, `sales-by-day`, `sales-by-month`).
 
 ---
 

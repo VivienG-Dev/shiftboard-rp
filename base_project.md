@@ -493,7 +493,12 @@ Using layout: `dashboard.vue`
 
 - Create/edit cards
 - Admin validations
-- Stats per day/per seller
+- Stats per day/per seller (KPIs + charts)
+  - `GET /companies/:companyId/kpis`
+  - `GET /companies/:companyId/charts/sales-by-hour`
+  - `GET /companies/:companyId/charts/sales-by-day`
+  - `GET /companies/:companyId/charts/sales-by-month`
+  - `GET /companies/:companyId/charts/sales?bucket=hour|day|month`
 
 ### Phase 4 — Polish
 
