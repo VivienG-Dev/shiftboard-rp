@@ -17,11 +17,15 @@ export class SalesCardsController {
   async listSalesCards(
     @Session() session: UserSession,
     @Param('companyId') companyId: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
     @Query('status') status?: SalesCardStatus,
     @Query('userId') userId?: string,
   ) {
     return {
       data: await this.salesCardsService.listSalesCards(session.user.id, companyId, {
+        from,
+        to,
         status,
         userId,
       }),

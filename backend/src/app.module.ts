@@ -12,6 +12,7 @@ import { SalesCardsModule } from './sales-cards/sales-cards.module';
 import { StockModule } from './stock/stock.module';
 import { KpisModule } from './kpis/kpis.module';
 import { RestocksModule } from './restocks/restocks.module';
+import { ChartsModule } from './charts/charts.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RestocksModule } from './restocks/restocks.module';
     SalesCardsModule,
     StockModule,
     KpisModule,
+    ChartsModule,
     RestocksModule,
   ],
   controllers: [AppController],

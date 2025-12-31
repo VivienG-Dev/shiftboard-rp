@@ -65,13 +65,24 @@ export class SalesCardsService {
   async listSalesCards(
     requesterId: string,
     companyId: string,
-    query: { status?: SalesCardStatus; userId?: string },
+    query: { from?: string; to?: string; status?: SalesCardStatus; userId?: string },
   ) {
     await this.assertCompanyAccess(requesterId, companyId);
+
+    const from = parseOptionalIsoDate(query.from);
+    const to = parseOptionalIsoDate(query.to);
+    if (query.from && !from) throw new BadRequestException('Invalid `from` date');
+    if (query.to && !to) throw new BadRequestException('Invalid `to` date');
+    if (from && to && from.getTime() > to.getTime()) {
+      throw new BadRequestException('`from` cannot be after `to`');
+    }
 
     return this.prisma.salesCard.findMany({
       where: {
         companyId,
+        ...(from || to
+          ? { startAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } }
+          : {}),
         ...(query.status ? { status: query.status } : {}),
         ...(query.userId ? { userId: query.userId } : {}),
       },
