@@ -1,0 +1,127 @@
+<script setup lang="ts">
+definePageMeta({
+  middleware: "auth",
+  layout: "company",
+  ssr: false,
+});
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useCompanyInventory } from "~/composables/useCompanyInventory";
+import type { RestockDetail } from "~/composables/useCompanyInventory";
+import { Truck } from "lucide-vue-next";
+
+const route = useRoute();
+const companyId = computed(() => String(route.params.companyId));
+const restockId = computed(() => String(route.params.restockId));
+
+const { getRestock } = useCompanyInventory();
+
+const restock = ref<RestockDetail | null>(null);
+const isLoading = ref(true);
+const errorMessage = ref<string | null>(null);
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+async function load() {
+  isLoading.value = true;
+  errorMessage.value = null;
+  try {
+    const res = await getRestock(companyId.value, restockId.value);
+    restock.value = res.data;
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible de charger le restock.";
+    errorMessage.value = message;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+onMounted(load);
+</script>
+
+<template>
+  <div class="space-y-6">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 class="flex items-center gap-2 text-3xl font-bold tracking-tight">
+          <Truck class="h-6 w-6" />
+          Restock
+        </h1>
+        <p class="mt-1 text-sm text-muted-foreground" v-if="restock">
+          {{ formatDate(restock.createdAt) }} • {{ restock.lines.length }} ligne(s)
+        </p>
+      </div>
+
+      <div class="flex gap-2">
+        <NuxtLink :to="`/companies/${companyId}/stock`">
+          <Button variant="outline">Voir stock</Button>
+        </NuxtLink>
+        <NuxtLink :to="`/companies/${companyId}/restocks/new`">
+          <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+            Nouveau restock
+          </Button>
+        </NuxtLink>
+      </div>
+    </div>
+
+    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+      {{ errorMessage }}
+    </div>
+
+    <Card v-if="restock" class="border-border bg-card/60">
+      <CardHeader class="space-y-1">
+        <CardTitle class="text-lg">Détails</CardTitle>
+        <CardDescription>{{ restock.note ?? "—" }}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="rounded-xl border border-border bg-background/40">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Item</TableHead>
+                <TableHead>Unité</TableHead>
+                <TableHead class="text-right">Quantité ajoutée</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="line in restock.lines" :key="line.id">
+                <TableCell class="font-medium">{{ line.item.name }}</TableCell>
+                <TableCell class="text-muted-foreground">{{ line.item.unit }}</TableCell>
+                <TableCell class="text-right">{{ line.quantityAdded }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+
+    <div v-else-if="isLoading" class="text-sm text-muted-foreground">
+      Chargement…
+    </div>
+  </div>
+</template>
+
