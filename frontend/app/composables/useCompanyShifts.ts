@@ -47,6 +47,8 @@ type UpdateSalesCardInput = {
 type StopSalesCardInput = { endAt?: string };
 
 type ListSalesCardsQuery = {
+  from?: string;
+  to?: string;
   status?: SalesCardStatus;
   userId?: string;
 };
@@ -106,6 +108,13 @@ export function useCompanyShifts() {
     );
   }
 
+  async function lockSalesCard(companyId: string, cardId: string) {
+    return apiFetch<DataResponse<SalesCard>>(
+      `/companies/${companyId}/sales-cards/${cardId}/lock`,
+      { method: "POST" }
+    );
+  }
+
   return {
     listSalesCards,
     getActiveSalesCard,
@@ -113,6 +122,7 @@ export function useCompanyShifts() {
     getSalesCard,
     updateSalesCard,
     stopSalesCard,
+    lockSalesCard,
   };
 }
 
@@ -123,4 +133,3 @@ function normalizeBackendUrl(value?: string) {
   if (!trimmed) return fallback;
   return trimmed.replace(/\/$/, "");
 }
-

@@ -74,7 +74,7 @@ const startNote = ref("");
 const startLocationId = ref<string>("");
 
 const editNote = ref("");
-const quantities = ref<Record<string, string>>({});
+const quantities = ref<Record<string, string | number | null | undefined>>({});
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -84,11 +84,24 @@ function formatDate(value: string) {
   }).format(date);
 }
 
-function parseNonNegativeInt(value: string) {
-  if (value.trim() === "") return null;
-  const n = Number(value);
-  if (!Number.isInteger(n) || n < 0) return NaN;
+function parseNonNegativeInt(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return NaN;
+    if (!Number.isInteger(value) || value < 0) return NaN;
+    return value;
+  }
+
+  const s = String(value);
+  if (s.trim() === "") return null;
+  const n = Number(s);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return NaN;
   return n;
+}
+
+function safeTrim(value: unknown) {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
 }
 
 function hydrateFromCard(card: SalesCard | null) {
@@ -143,8 +156,8 @@ async function onStart() {
   isStarting.value = true;
   try {
     const res = await startSalesCard(companyId.value, {
-      note: startNote.value.trim() || undefined,
-      locationId: startLocationId.value.trim() || undefined,
+      note: safeTrim(startNote.value) || undefined,
+      locationId: safeTrim(startLocationId.value) || undefined,
     });
     startNote.value = "";
     startLocationId.value = "";
@@ -178,7 +191,7 @@ async function onSave() {
     }
 
     const res = await updateSalesCard(companyId.value, activeCard.value.id, {
-      note: editNote.value.trim() || undefined,
+      note: safeTrim(editNote.value) || undefined,
       lines: lines as Array<{ itemId: string; quantitySold: number }>,
     });
 
