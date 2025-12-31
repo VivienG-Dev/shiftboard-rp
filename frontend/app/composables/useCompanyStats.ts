@@ -12,12 +12,27 @@ export type SalesByHourRow = {
   itemsSold: number;
 };
 
+export type SalesByDayRow = {
+  day: string; // YYYY-MM-DD
+  revenue: number;
+  itemsSold: number;
+};
+
+export type SalesByMonthRow = {
+  month: string; // YYYY-MM
+  revenue: number;
+  itemsSold: number;
+};
+
+export type SalesBucket = "hour" | "day" | "month";
+
 type DataResponse<T> = { data: T };
 type ListResponse<T> = { data: T[] };
 
 type DateRangeQuery = {
   from?: string;
   to?: string;
+  tzOffsetMinutes?: string;
 };
 
 export function useCompanyStats() {
@@ -49,7 +64,34 @@ export function useCompanyStats() {
     );
   }
 
-  return { getKpis, getSalesByHour };
+  async function getSalesByDay(companyId: string, query: DateRangeQuery = {}) {
+    return apiFetch<ListResponse<SalesByDayRow>>(
+      `/companies/${companyId}/charts/sales-by-day`,
+      { query }
+    );
+  }
+
+  async function getSalesByMonth(companyId: string, query: DateRangeQuery = {}) {
+    return apiFetch<ListResponse<SalesByMonthRow>>(
+      `/companies/${companyId}/charts/sales-by-month`,
+      { query }
+    );
+  }
+
+  async function getSales(
+    companyId: string,
+    bucket: SalesBucket,
+    query: DateRangeQuery = {}
+  ) {
+    return apiFetch<ListResponse<SalesByHourRow | SalesByDayRow | SalesByMonthRow>>(
+      `/companies/${companyId}/charts/sales`,
+      {
+        query: { ...query, bucket },
+      }
+    );
+  }
+
+  return { getKpis, getSalesByHour, getSalesByDay, getSalesByMonth, getSales };
 }
 
 function normalizeBackendUrl(value?: string) {
@@ -59,4 +101,3 @@ function normalizeBackendUrl(value?: string) {
   if (!trimmed) return fallback;
   return trimmed.replace(/\/$/, "");
 }
-
