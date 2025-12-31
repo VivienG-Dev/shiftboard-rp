@@ -12,6 +12,7 @@ import {
   Sun,
   User,
   ClipboardList,
+  FileText,
   Users,
   Truck,
 } from "lucide-vue-next";
@@ -137,6 +138,13 @@ const toggleTheme = () => {
               >
                 <ClipboardList class="h-4 w-4" />
                 <span>Shifts</span>
+              </NuxtLink>
+              <NuxtLink
+                :to="`/companies/${companyId}/sales-cards`"
+                :class="navLinkClass(isActive(`/companies/${companyId}/sales-cards`))"
+              >
+                <FileText class="h-4 w-4" />
+                <span>Rapports</span>
               </NuxtLink>
               <NuxtLink
                 :to="`/companies/${companyId}/team`"
