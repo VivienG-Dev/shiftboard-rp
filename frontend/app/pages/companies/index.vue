@@ -141,7 +141,7 @@ onMounted(refresh);
               <span v-if="company.slug">Slug: {{ company.slug }}</span>
               <span v-else>Slug automatique</span>
             </div>
-            <NuxtLink :to="`/companies/${company.id}/dashboard`">
+            <NuxtLink :to="`/companies/${company.id}`">
               <Button variant="secondary">Ouvrir</Button>
             </NuxtLink>
           </CardContent>

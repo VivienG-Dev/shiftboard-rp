@@ -8,7 +8,8 @@ definePageMeta({
 const route = useRoute();
 const companyId = computed(() => String(route.params.companyId));
 
-await navigateTo(`/companies/${companyId.value}/dashboard`);
+await navigateTo(`/companies/${companyId.value}/team/members`);
 </script>
 
 <template />
+
