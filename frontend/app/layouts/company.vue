@@ -31,6 +31,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "~/composables/useAuth";
 import { useCompanies } from "~/composables/useCompanies";
 
@@ -96,13 +97,20 @@ const toggleTheme = () => {
                   SB
                 </div>
                 <div class="min-w-0">
-                  <div class="truncate text-sm font-semibold tracking-tight">
-                    <span v-if="loadingCompany">Chargement…</span>
-                    <span v-else>{{ companyName }}</span>
-                  </div>
-                  <div class="text-xs text-muted-foreground">
-                    Company dashboard
-                  </div>
+                  <template v-if="loadingCompany">
+                    <div class="space-y-1">
+                      <Skeleton class="h-4 w-32" />
+                      <Skeleton class="h-3 w-24" />
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="truncate text-sm font-semibold tracking-tight">
+                      {{ companyName }}
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                      Company dashboard
+                    </div>
+                  </template>
                 </div>
               </NuxtLink>
             </SidebarMenuButton>
@@ -277,7 +285,7 @@ const toggleTheme = () => {
         class="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/80 px-3 py-2 backdrop-blur md:hidden">
         <SidebarTrigger />
         <div class="min-w-0 truncate text-sm font-semibold">
-          <span v-if="loadingCompany">Chargement…</span>
+          <Skeleton v-if="loadingCompany" class="h-4 w-40" />
           <span v-else>{{ companyName }}</span>
         </div>
       </div>

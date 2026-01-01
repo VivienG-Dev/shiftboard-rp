@@ -7,6 +7,7 @@ definePageMeta({
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyInventory } from "~/composables/useCompanyInventory";
 import { useCompanyShifts } from "~/composables/useCompanyShifts";
 import type { SalesCard } from "~/composables/useCompanyShifts";
@@ -35,6 +36,7 @@ import {
   ClipboardList,
   Users,
   TrendingUp,
+  Loader2,
 } from "lucide-vue-next";
 
 const route = useRoute();
@@ -360,6 +362,7 @@ onMounted(refresh);
           <option value="30D">30 jours</option>
         </select>
         <Button variant="outline" @click="refresh" :disabled="isLoading">
+          <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
           Actualiser
         </Button>
       </div>
@@ -381,7 +384,7 @@ onMounted(refresh);
           </CardTitle>
         </CardHeader>
         <CardContent class="text-2xl font-semibold">
-          <span v-if="isLoading" class="text-muted-foreground">—</span>
+          <Skeleton v-if="isLoading" class="h-8 w-28" />
           <span v-else>{{ formatMoney(revenue) }}</span>
         </CardContent>
       </Card>
@@ -394,7 +397,7 @@ onMounted(refresh);
           </CardTitle>
         </CardHeader>
         <CardContent class="text-2xl font-semibold">
-          <span v-if="isLoading" class="text-muted-foreground">—</span>
+          <Skeleton v-if="isLoading" class="h-8 w-20" />
           <span v-else>{{ itemsSold.toLocaleString("fr-FR") }}</span>
         </CardContent>
       </Card>
@@ -407,7 +410,7 @@ onMounted(refresh);
           </CardTitle>
         </CardHeader>
         <CardContent class="text-2xl font-semibold">
-          <span v-if="isLoading" class="text-muted-foreground">—</span>
+          <Skeleton v-if="isLoading" class="h-8 w-14" />
           <span v-else>{{ lowStock.toLocaleString("fr-FR") }}</span>
         </CardContent>
       </Card>
@@ -420,7 +423,7 @@ onMounted(refresh);
           </CardTitle>
         </CardHeader>
         <CardContent class="text-2xl font-semibold">
-          <span v-if="isLoading" class="text-muted-foreground">—</span>
+          <Skeleton v-if="isLoading" class="h-8 w-12" />
           <span v-else>{{ activeStaff.toLocaleString("fr-FR") }}</span>
         </CardContent>
       </Card>
@@ -446,7 +449,12 @@ onMounted(refresh);
         </CardHeader>
         <CardContent>
           <div class="h-64">
-            <ChartContainer :config="chartConfig as any" class="h-full" cursor>
+            <Skeleton v-if="isLoading" class="h-full w-full" />
+            <ChartContainer
+              v-else
+              :config="chartConfig as any"
+              class="h-full"
+              cursor>
               <template #default>
                 <VisXYContainer
                   :data="series"
@@ -463,16 +471,16 @@ onMounted(refresh);
                     position="left"
                     :tickFormat="(t: any) => t.toLocaleString('fr-FR')"
                     :gridLine="true" />
-	                  <VisArea
-	                    :x="(d: any) => d.x"
-	                    :y="(d: any) => d.revenue"
-	                    :color="() => revenueColor"
-	                    :opacity="() => 0.22" />
-	                  <VisLine
-	                    :x="(d: any) => d.x"
-	                    :y="(d: any) => d.revenue"
-	                    :lineWidth="2"
-	                    :color="() => revenueColor" />
+                  <VisArea
+                    :x="(d: any) => d.x"
+                    :y="(d: any) => d.revenue"
+                    :color="() => revenueColor"
+                    :opacity="() => 0.22" />
+                  <VisLine
+                    :x="(d: any) => d.x"
+                    :y="(d: any) => d.revenue"
+                    :lineWidth="2"
+                    :color="() => revenueColor" />
                   <VisCrosshair
                     :x="(d: any) => d.x"
                     :y="(d: any) => d.revenue" />
@@ -492,8 +500,10 @@ onMounted(refresh);
           <CardTitle class="text-base">Derniers shifts</CardTitle>
         </CardHeader>
         <CardContent class="space-y-3">
-          <div v-if="isLoading" class="text-sm text-muted-foreground">
-            Chargement…
+          <div v-if="isLoading" class="space-y-2">
+            <Skeleton class="h-12 w-full" />
+            <Skeleton class="h-12 w-full" />
+            <Skeleton class="h-12 w-full" />
           </div>
           <div
             v-else-if="recentCards.length === 0"
