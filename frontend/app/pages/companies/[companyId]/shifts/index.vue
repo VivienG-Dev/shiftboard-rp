@@ -35,6 +35,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import { useCompanies } from "~/composables/useCompanies";
 import { useCompanyInventory } from "~/composables/useCompanyInventory";
 import { useCompanyShifts } from "~/composables/useCompanyShifts";
@@ -190,13 +197,21 @@ async function onSave() {
       throw new Error("Les quantités doivent être des entiers ≥ 0.");
     }
 
+    const effectiveLines = (lines as Array<{ itemId: string; quantitySold: number }>).filter(
+      (l) => l.quantitySold > 0
+    );
+    const totalSold = effectiveLines.reduce((sum, l) => sum + l.quantitySold, 0);
+
     const res = await updateSalesCard(companyId.value, activeCard.value.id, {
       note: safeTrim(editNote.value) || undefined,
       lines: lines as Array<{ itemId: string; quantitySold: number }>,
     });
 
     hydrateFromCard(res.data);
-    successMessage.value = "Sauvegardé.";
+    successMessage.value =
+      effectiveLines.length === 0
+        ? "Sauvegardé — aucune vente enregistrée. Tu peux continuer ou stopper pour soumettre."
+        : `Sauvegardé — ${totalSold} vente(s) sur ${effectiveLines.length} item(s). Tu peux continuer ou stopper pour soumettre.`;
   } catch (error: unknown) {
     const message =
       (error as any)?.data?.message ||
@@ -325,14 +340,13 @@ onMounted(loadAll);
                   <TableCell class="font-medium">{{ item.name }}</TableCell>
                   <TableCell class="text-muted-foreground">{{ item.unit }}</TableCell>
                   <TableCell class="text-right">
-                    <Input
-                      v-model="quantities[item.id]"
-                      class="w-28 text-right"
-                      type="number"
-                      min="0"
-                      step="1"
-                      placeholder="—"
-                    />
+                    <NumberField v-model="quantities[item.id]" :min="0" :step="1">
+                      <NumberFieldContent class="ml-auto w-32">
+                        <NumberFieldDecrement />
+                        <NumberFieldInput />
+                        <NumberFieldIncrement />
+                      </NumberFieldContent>
+                    </NumberField>
                   </TableCell>
                 </TableRow>
               </TableBody>

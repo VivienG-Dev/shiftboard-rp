@@ -16,6 +16,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
+import {
   Table,
   TableBody,
   TableCell,
@@ -40,7 +47,7 @@ const isSaving = ref(false);
 const errorMessage = ref<string | null>(null);
 const note = ref<string>("");
 
-const quantities = ref<Record<string, string>>({});
+const quantities = ref<Record<string, string | number | null | undefined>>({});
 
 async function loadItems() {
   isLoading.value = true;
@@ -48,7 +55,7 @@ async function loadItems() {
   try {
     const res = await listItems(companyId.value, { activeOnly: true });
     items.value = (res.data ?? []).filter((i) => !i.archivedAt);
-    const next: Record<string, string> = {};
+    const next: Record<string, string | number | null | undefined> = {};
     for (const item of items.value) {
       next[item.id] = quantities.value[item.id] ?? "";
     }
@@ -64,10 +71,17 @@ async function loadItems() {
   }
 }
 
-function parseNonNegativeInt(value: string) {
-  if (value.trim() === "") return null;
-  const n = Number(value);
-  if (!Number.isInteger(n) || n < 0) return NaN;
+function parseNonNegativeInt(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return NaN;
+    if (!Number.isInteger(value) || value < 0) return NaN;
+    return value;
+  }
+  const s = String(value);
+  if (s.trim() === "") return null;
+  const n = Number(s);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return NaN;
   return n;
 }
 
@@ -162,14 +176,13 @@ onMounted(loadItems);
                 <TableCell class="font-medium">{{ item.name }}</TableCell>
                 <TableCell class="text-muted-foreground">{{ item.unit }}</TableCell>
                 <TableCell class="text-right">
-                  <Input
-                    v-model="quantities[item.id]"
-                    class="w-28 text-right"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="—"
-                  />
+                  <NumberField v-model="quantities[item.id]" :min="0" :step="1">
+                    <NumberFieldContent class="ml-auto w-32">
+                      <NumberFieldDecrement />
+                      <NumberFieldInput />
+                      <NumberFieldIncrement />
+                    </NumberFieldContent>
+                  </NumberField>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -194,4 +207,3 @@ onMounted(loadItems);
     </Card>
   </div>
 </template>
-
