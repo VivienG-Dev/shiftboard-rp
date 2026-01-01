@@ -26,6 +26,12 @@ export type SalesByMonthRow = {
 
 export type SalesBucket = "hour" | "day" | "month";
 
+export type SalesTimeseriesRow = {
+  ts: string; // ISO
+  revenue: number;
+  itemsSold: number;
+};
+
 type DataResponse<T> = { data: T };
 type ListResponse<T> = { data: T[] };
 
@@ -91,7 +97,24 @@ export function useCompanyStats() {
     );
   }
 
-  return { getKpis, getSalesByHour, getSalesByDay, getSalesByMonth, getSales };
+  async function getSalesTimeseries(
+    companyId: string,
+    query: DateRangeQuery & { interval?: "hour" } = {}
+  ) {
+    return apiFetch<ListResponse<SalesTimeseriesRow>>(
+      `/companies/${companyId}/charts/sales-timeseries`,
+      { query: { interval: "hour", ...query } }
+    );
+  }
+
+  return {
+    getKpis,
+    getSalesByHour,
+    getSalesByDay,
+    getSalesByMonth,
+    getSales,
+    getSalesTimeseries,
+  };
 }
 
 function normalizeBackendUrl(value?: string) {

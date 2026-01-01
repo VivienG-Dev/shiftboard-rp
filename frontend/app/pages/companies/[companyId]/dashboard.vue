@@ -43,7 +43,7 @@ const companyId = computed(() => String(route.params.companyId));
 const { getStock } = useCompanyInventory();
 const { listSalesCards } = useCompanyShifts();
 const { listMembers } = useCompanyTeam();
-const { getKpis, getSales } = useCompanyStats();
+const { getKpis, getSales, getSalesTimeseries } = useCompanyStats();
 
 type RangeKey = "24H" | "7D" | "30D";
 const range = ref<RangeKey>("7D");
@@ -257,26 +257,37 @@ async function refresh() {
   try {
     if (!supportsChartsApi.value) throw new Error("Charts endpoint disabled");
 
-    const chartRes = await getSales(companyId.value, bucket.value, {
-      from: chartFrom,
-      to,
-      tzOffsetMinutes,
-    });
-
     if (bucket.value === "hour") {
-      const points = (chartRes.data as any[])
-        .filter((r) => Number.isFinite(r.hour))
-        .map((r) => ({
-          x: r.hour,
-          label: `${String(r.hour).padStart(2, "0")}h`,
+      const tsRes = await getSalesTimeseries(companyId.value, {
+        from: chartFrom,
+        to,
+        tzOffsetMinutes,
+      });
+      const rows = tsRes.data ?? [];
+      series.value = rows.map((r, idx) => {
+        const d = new Date(r.ts);
+        const label = Number.isNaN(d.getTime())
+          ? r.ts
+          : new Intl.DateTimeFormat("fr-FR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(d);
+        return {
+          x: idx,
+          label,
           revenue: clampToNumber(r.revenue),
           itemsSold: clampToNumber(r.itemsSold),
-        }))
-        .sort((a, b) => a.x - b.x);
-      series.value = points.length
-        ? points
-        : buildHourlySeries(recentCards.value);
+        };
+      });
+      if (series.value.length === 0) {
+        series.value = buildHourlySeries(recentCards.value);
+      }
     } else if (bucket.value === "day") {
+      const chartRes = await getSales(companyId.value, bucket.value, {
+        from: chartFrom,
+        to,
+        tzOffsetMinutes,
+      });
       const rows = (chartRes.data as any[]).filter(
         (r) => typeof r.day === "string"
       );
@@ -287,6 +298,11 @@ async function refresh() {
         itemsSold: clampToNumber(r.itemsSold),
       }));
     } else {
+      const chartRes = await getSales(companyId.value, bucket.value, {
+        from: chartFrom,
+        to,
+        tzOffsetMinutes,
+      });
       const rows = (chartRes.data as any[]).filter(
         (r) => typeof r.month === "string"
       );
