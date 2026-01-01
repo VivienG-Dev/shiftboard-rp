@@ -87,12 +87,12 @@ const toggleTheme = () => {
               as-child
               size="lg"
               :is-active="isActive(`/companies/${companyId}/dashboard`)"
-              tooltip="Aperçu"
-            >
-              <NuxtLink :to="`/companies/${companyId}/dashboard`" class="flex items-center gap-3">
+              tooltip="Aperçu">
+              <NuxtLink
+                :to="`/companies/${companyId}/dashboard`"
+                class="flex items-center gap-3">
                 <div
-                  class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950"
-                >
+                  class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
                   SB
                 </div>
                 <div class="min-w-0">
@@ -100,15 +100,15 @@ const toggleTheme = () => {
                     <span v-if="loadingCompany">Chargement…</span>
                     <span v-else>{{ companyName }}</span>
                   </div>
-                  <div class="text-xs text-muted-foreground">Company dashboard</div>
+                  <div class="text-xs text-muted-foreground">
+                    Company dashboard
+                  </div>
                 </div>
               </NuxtLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-
-      <SidebarSeparator />
 
       <SidebarContent>
         <SidebarGroup>
@@ -119,8 +119,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/dashboard`)"
-                  tooltip="Aperçu"
-                >
+                  tooltip="Aperçu">
                   <NuxtLink :to="`/companies/${companyId}/dashboard`">
                     <LayoutDashboard />
                     <span>Aperçu</span>
@@ -132,8 +131,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/locations`)"
-                  tooltip="Lieux"
-                >
+                  tooltip="Lieux">
                   <NuxtLink :to="`/companies/${companyId}/locations`">
                     <MapPin />
                     <span>Lieux</span>
@@ -145,8 +143,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/items`)"
-                  tooltip="Inventaire"
-                >
+                  tooltip="Inventaire">
                   <NuxtLink :to="`/companies/${companyId}/items`">
                     <Package />
                     <span>Inventaire</span>
@@ -158,8 +155,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/stock`)"
-                  tooltip="Stock"
-                >
+                  tooltip="Stock">
                   <NuxtLink :to="`/companies/${companyId}/stock`">
                     <Boxes />
                     <span>Stock</span>
@@ -171,8 +167,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/snapshots`)"
-                  tooltip="Snapshots"
-                >
+                  tooltip="Snapshots">
                   <NuxtLink :to="`/companies/${companyId}/snapshots`">
                     <Camera />
                     <span>Snapshots</span>
@@ -184,8 +179,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/restocks`)"
-                  tooltip="Restocks"
-                >
+                  tooltip="Restocks">
                   <NuxtLink :to="`/companies/${companyId}/restocks`">
                     <Truck />
                     <span>Restocks</span>
@@ -197,8 +191,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/shifts`)"
-                  tooltip="Shifts"
-                >
+                  tooltip="Shifts">
                   <NuxtLink :to="`/companies/${companyId}/shifts`">
                     <ClipboardList />
                     <span>Shifts</span>
@@ -210,8 +203,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/sales-cards`)"
-                  tooltip="Rapports"
-                >
+                  tooltip="Rapports">
                   <NuxtLink :to="`/companies/${companyId}/sales-cards`">
                     <FileText />
                     <span>Rapports</span>
@@ -223,8 +215,7 @@ const toggleTheme = () => {
                 <SidebarMenuButton
                   as-child
                   :is-active="isActive(`/companies/${companyId}/team`)"
-                  tooltip="Équipe"
-                >
+                  tooltip="Équipe">
                   <NuxtLink :to="`/companies/${companyId}/team`">
                     <Users />
                     <span>Équipe</span>
@@ -235,8 +226,6 @@ const toggleTheme = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarSeparator />
 
       <SidebarFooter>
         <SidebarMenu>
@@ -262,11 +251,14 @@ const toggleTheme = () => {
             <SidebarMenuButton
               tooltip="Mode clair / sombre"
               @click="toggleTheme"
-              :aria-label="`Basculer en mode ${colorMode.value === 'dark' ? 'clair' : 'sombre'}`"
-            >
+              :aria-label="`Basculer en mode ${
+                colorMode.value === 'dark' ? 'clair' : 'sombre'
+              }`">
               <Sun v-if="colorMode.value === 'dark'" />
               <Moon v-else />
-              <span>{{ colorMode.value === "dark" ? "Mode clair" : "Mode sombre" }}</span>
+              <span>{{
+                colorMode.value === "dark" ? "Mode clair" : "Mode sombre"
+              }}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
@@ -281,7 +273,8 @@ const toggleTheme = () => {
     </Sidebar>
 
     <SidebarInset>
-      <div class="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/80 px-3 py-2 backdrop-blur md:hidden">
+      <div
+        class="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/80 px-3 py-2 backdrop-blur md:hidden">
         <SidebarTrigger />
         <div class="min-w-0 truncate text-sm font-semibold">
           <span v-if="loadingCompany">Chargement…</span>
