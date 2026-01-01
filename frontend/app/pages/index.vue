@@ -12,7 +12,7 @@ const { isAuthenticated, session, signOut } = useAuth();
 
 <template>
   <div
-    class="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-muted/40 to-background text-foreground">
+    class="relative min-h-screen overflow-hidden bg-linear-to-br from-background via-muted/40 to-background text-foreground">
     <div
       class="pointer-events-none absolute inset-0 [background:radial-gradient(1000px_circle_at_15%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(900px_circle_at_85%_35%,rgba(225,29,72,0.14),transparent_55%)]" />
 
@@ -20,7 +20,7 @@ const { isAuthenticated, session, signOut } = useAuth();
       class="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
       <div class="flex items-center gap-3">
         <div
-          class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
+          class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
           SB
         </div>
         <div>
@@ -96,13 +96,13 @@ const { isAuthenticated, session, signOut } = useAuth();
 
         <div class="relative hidden lg:block">
           <div
-            class="absolute -inset-8 rounded-[2rem] bg-gradient-to-tr from-cyan-400/20 via-slate-950/10 to-pink-500/20 blur-2xl" />
+            class="absolute -inset-8 rounded-4xl bg-linear-to-tr from-cyan-400/20 via-slate-950/10 to-pink-500/20 blur-2xl" />
           <div
             class="relative overflow-hidden rounded-2xl border border-border bg-card/50">
             <div
               class="absolute inset-0 bg-[url('/images/ls-skyline.svg')] bg-cover bg-center opacity-70" />
             <div
-              class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+              class="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
             <div class="relative p-8">
               <div class="text-sm font-semibold tracking-wide text-slate-200">
                 Los Santos Night Shift
