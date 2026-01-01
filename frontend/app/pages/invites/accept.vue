@@ -5,7 +5,14 @@ definePageMeta({
 });
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCompanyTeam } from "~/composables/useCompanyTeam";
 import { CheckCircle2, Loader2, Ticket } from "lucide-vue-next";
@@ -41,7 +48,8 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
+  <div
+    class="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
     <Card class="w-full max-w-md border-border bg-card/60">
       <CardHeader class="space-y-1">
         <CardTitle class="flex items-center gap-2 text-2xl">
@@ -56,26 +64,28 @@ async function onSubmit() {
         <div v-if="errorMessage" class="text-sm text-red-500">
           {{ errorMessage }}
         </div>
-        <div v-if="successMessage" class="flex items-center gap-2 text-sm text-green-600">
+        <div
+          v-if="successMessage"
+          class="flex items-center gap-2 text-sm text-green-600">
           <CheckCircle2 class="h-4 w-4" />
           {{ successMessage }}
         </div>
         <Button
-          class="w-full bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+          class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
           :disabled="isLoading || !code.trim()"
-          @click="onSubmit"
-        >
+          @click="onSubmit">
           <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
           {{ isLoading ? "Validation..." : "Valider" }}
         </Button>
       </CardContent>
 
       <CardFooter class="justify-center">
-        <NuxtLink class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4" to="/companies">
+        <NuxtLink
+          class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+          to="/companies">
           Retour
         </NuxtLink>
       </CardFooter>
     </Card>
   </div>
 </template>
-

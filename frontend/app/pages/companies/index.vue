@@ -58,7 +58,7 @@ onMounted(refresh);
         <div class="flex items-center gap-3">
           <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
             <div
-              class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
+              class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
               SB
             </div>
             <div>
@@ -92,7 +92,7 @@ onMounted(refresh);
         </div>
         <NuxtLink to="/companies/new">
           <Button
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
             Créer une entreprise
           </Button>
         </NuxtLink>
@@ -116,7 +116,7 @@ onMounted(refresh);
         <div class="mt-6 flex flex-wrap gap-2">
           <NuxtLink to="/companies/new">
             <Button
-              class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+              class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
               Créer une entreprise
             </Button>
           </NuxtLink>

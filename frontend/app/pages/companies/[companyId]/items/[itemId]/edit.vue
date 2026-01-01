@@ -66,19 +66,30 @@ const categoryOptions: Array<{ value: ItemCategory; label: string }> = [
 
 const schema = toTypedSchema(
   z.object({
-    name: z.string().min(1, "Le nom est requis").max(120, "Le nom est trop long"),
-    category: z.enum(["DRINK", "SOFT_DRINK", "ALCOHOL_DRINK", "BOTTLE", "FOOD", "OTHER"]),
-    unit: z.string().min(1, "L'unité est requise").max(32, "L'unité est trop longue"),
-    basePrice: z
-      .preprocess(
-        (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
-        z.number().min(0, "Prix invalide").nullable()
-      ),
-    lowStockThreshold: z
-      .preprocess(
-        (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
-        z.number().int("Doit être un entier").min(0, "Seuil invalide").nullable()
-      ),
+    name: z
+      .string()
+      .min(1, "Le nom est requis")
+      .max(120, "Le nom est trop long"),
+    category: z.enum([
+      "DRINK",
+      "SOFT_DRINK",
+      "ALCOHOL_DRINK",
+      "BOTTLE",
+      "FOOD",
+      "OTHER",
+    ]),
+    unit: z
+      .string()
+      .min(1, "L'unité est requise")
+      .max(32, "L'unité est trop longue"),
+    basePrice: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
+      z.number().min(0, "Prix invalide").nullable()
+    ),
+    lowStockThreshold: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
+      z.number().int("Doit être un entier").min(0, "Seuil invalide").nullable()
+    ),
   })
 );
 
@@ -173,10 +184,14 @@ onMounted(load);
   <div class="space-y-6">
     <div>
       <h1 class="text-3xl font-bold tracking-tight">Modifier un item</h1>
-      <p class="mt-1 text-sm text-muted-foreground">Mets à jour les infos de l'item.</p>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Mets à jour les infos de l'item.
+      </p>
     </div>
 
-    <div v-if="generalError" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="generalError"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ generalError }}
     </div>
 
@@ -190,14 +205,19 @@ onMounted(load);
       </CardHeader>
 
       <CardContent>
-        <div v-if="isLoading" class="text-sm text-muted-foreground">Chargement…</div>
+        <div v-if="isLoading" class="text-sm text-muted-foreground">
+          Chargement…
+        </div>
 
         <form v-else class="space-y-4" @submit.prevent="onSubmit">
           <FormField v-slot="{ componentField }" name="name">
             <FormItem>
               <FormLabel>Nom <span class="text-red-400">*</span></FormLabel>
               <FormControl>
-                <Input v-bind="componentField" placeholder="Ex: Vodka" autocomplete="off" />
+                <Input
+                  v-bind="componentField"
+                  placeholder="Ex: Vodka"
+                  autocomplete="off" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -206,10 +226,15 @@ onMounted(load);
           <div class="grid gap-4 md:grid-cols-2">
             <FormField v-slot="{ field }" name="category">
               <FormItem>
-                <FormLabel>Catégorie <span class="text-red-400">*</span></FormLabel>
+                <FormLabel
+                  >Catégorie <span class="text-red-400">*</span></FormLabel
+                >
                 <FormControl>
                   <NativeSelect v-bind="field">
-                    <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">
+                    <option
+                      v-for="opt in categoryOptions"
+                      :key="opt.value"
+                      :value="opt.value">
                       {{ opt.label }}
                     </option>
                   </NativeSelect>
@@ -222,9 +247,14 @@ onMounted(load);
               <FormItem>
                 <FormLabel>Unité <span class="text-red-400">*</span></FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" placeholder="Ex: bottle" autocomplete="off" />
+                  <Input
+                    v-bind="componentField"
+                    placeholder="Ex: bottle"
+                    autocomplete="off" />
                 </FormControl>
-                <FormDescription>Exemples: bottle, glass, piece.</FormDescription>
+                <FormDescription
+                  >Exemples: bottle, glass, piece.</FormDescription
+                >
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -235,7 +265,11 @@ onMounted(load);
               <FormItem>
                 <FormLabel>Prix</FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" type="number" min="0" placeholder="Ex: 250" />
+                  <Input
+                    v-bind="componentField"
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 250" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -245,7 +279,11 @@ onMounted(load);
               <FormItem>
                 <FormLabel>Seuil stock faible</FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" type="number" min="0" placeholder="Ex: 3" />
+                  <Input
+                    v-bind="componentField"
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 3" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -253,10 +291,9 @@ onMounted(load);
           </div>
 
           <Button
-            class="w-full bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             type="submit"
-            :disabled="isSaving"
-          >
+            :disabled="isSaving">
             <Loader2 v-if="isSaving" class="w-4 h-4 mr-2 animate-spin" />
             {{ isSaving ? "Sauvegarde..." : "Sauvegarder" }}
           </Button>
@@ -271,8 +308,7 @@ onMounted(load);
           v-if="item && !item.archivedAt"
           variant="outline"
           :disabled="isArchiving"
-          @click="isArchiveDialogOpen = true"
-        >
+          @click="isArchiveDialogOpen = true">
           <Loader2 v-if="isArchiving" class="w-4 h-4 mr-2 animate-spin" />
           Archiver
         </Button>
@@ -284,16 +320,16 @@ onMounted(load);
         <AlertDialogHeader>
           <AlertDialogTitle>Archiver l'item ?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span v-if="item">“{{ item.name }}”</span> ne sera plus sélectionnable pour les nouveaux snapshots/restocks/shifts.
+            <span v-if="item">“{{ item.name }}”</span> ne sera plus
+            sélectionnable pour les nouveaux snapshots/restocks/shifts.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel :disabled="isArchiving">Annuler</AlertDialogCancel>
           <AlertDialogAction
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             :disabled="isArchiving"
-            @click="onArchive"
-          >
+            @click="onArchive">
             Archiver
           </AlertDialogAction>
         </AlertDialogFooter>

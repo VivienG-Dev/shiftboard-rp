@@ -48,21 +48,20 @@ import { useCompanyShifts } from "~/composables/useCompanyShifts";
 import type { CompanyLocation } from "~/composables/useCompanies";
 import type { Item } from "~/composables/useCompanyInventory";
 import type { SalesCard } from "~/composables/useCompanyShifts";
-import {
-  ClipboardList,
-  Loader2,
-  Play,
-  Save,
-  Square,
-} from "lucide-vue-next";
+import { ClipboardList, Loader2, Play, Save, Square } from "lucide-vue-next";
 
 const route = useRoute();
 const companyId = computed(() => String(route.params.companyId));
 
 const { listCompanyLocations } = useCompanies();
 const { listItems } = useCompanyInventory();
-const { getActiveSalesCard, startSalesCard, updateSalesCard, stopSalesCard, listSalesCards } =
-  useCompanyShifts();
+const {
+  getActiveSalesCard,
+  startSalesCard,
+  updateSalesCard,
+  stopSalesCard,
+  listSalesCards,
+} = useCompanyShifts();
 
 const locations = ref<CompanyLocation[]>([]);
 const items = ref<Item[]>([]);
@@ -190,17 +189,23 @@ async function onSave() {
   isSaving.value = true;
   try {
     const lines = Object.entries(quantities.value)
-      .map(([itemId, qty]) => ({ itemId, quantitySold: parseNonNegativeInt(qty) }))
+      .map(([itemId, qty]) => ({
+        itemId,
+        quantitySold: parseNonNegativeInt(qty),
+      }))
       .filter((l) => l.quantitySold !== null);
 
     if (lines.some((l) => Number.isNaN(l.quantitySold))) {
       throw new Error("Les quantités doivent être des entiers ≥ 0.");
     }
 
-    const effectiveLines = (lines as Array<{ itemId: string; quantitySold: number }>).filter(
-      (l) => l.quantitySold > 0
+    const effectiveLines = (
+      lines as Array<{ itemId: string; quantitySold: number }>
+    ).filter((l) => l.quantitySold > 0);
+    const totalSold = effectiveLines.reduce(
+      (sum, l) => sum + l.quantitySold,
+      0
     );
-    const totalSold = effectiveLines.reduce((sum, l) => sum + l.quantitySold, 0);
 
     const res = await updateSalesCard(companyId.value, activeCard.value.id, {
       note: safeTrim(editNote.value) || undefined,
@@ -260,10 +265,14 @@ onMounted(loadAll);
       </p>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
-    <div v-if="successMessage" class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
+    <div
+      v-if="successMessage"
+      class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
       {{ successMessage }}
     </div>
 
@@ -272,13 +281,17 @@ onMounted(loadAll);
         <CardTitle class="text-lg">Shift actif</CardTitle>
         <CardDescription v-if="activeCard">
           Démarré le {{ formatDate(activeCard.startAt) }}
-          <span v-if="activeCard.location"> • {{ activeCard.location.name }}</span>
+          <span v-if="activeCard.location">
+            • {{ activeCard.location.name }}</span
+          >
         </CardDescription>
         <CardDescription v-else>Aucun shift actif</CardDescription>
       </CardHeader>
 
       <CardContent class="space-y-4">
-        <div v-if="isLoading" class="text-sm text-muted-foreground">Chargement…</div>
+        <div v-if="isLoading" class="text-sm text-muted-foreground">
+          Chargement…
+        </div>
 
         <div v-else-if="!activeCard" class="grid gap-3 md:grid-cols-3">
           <Input v-model="startNote" placeholder="Note (optionnel)" />
@@ -291,10 +304,9 @@ onMounted(loadAll);
           </NativeSelect>
 
           <Button
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             :disabled="isStarting"
-            @click="onStart"
-          >
+            @click="onStart">
             <Loader2 v-if="isStarting" class="mr-2 h-4 w-4 animate-spin" />
             <Play v-else class="mr-2 h-4 w-4" />
             {{ isStarting ? "Démarrage..." : "Démarrer" }}
@@ -305,16 +317,18 @@ onMounted(loadAll);
           <div class="grid gap-3 md:grid-cols-2">
             <Input v-model="editNote" placeholder="Note (optionnel)" />
             <div class="flex flex-wrap gap-2 md:justify-end">
-              <Button variant="outline" :disabled="isSaving || isStopping" @click="onSave">
+              <Button
+                variant="outline"
+                :disabled="isSaving || isStopping"
+                @click="onSave">
                 <Loader2 v-if="isSaving" class="mr-2 h-4 w-4 animate-spin" />
                 <Save v-else class="mr-2 h-4 w-4" />
                 Sauvegarder
               </Button>
               <Button
-                class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+                class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
                 :disabled="isStopping"
-                @click="isStopDialogOpen = true"
-              >
+                @click="isStopDialogOpen = true">
                 <Loader2 v-if="isStopping" class="mr-2 h-4 w-4 animate-spin" />
                 <Square v-else class="mr-2 h-4 w-4" />
                 Stopper & soumettre
@@ -338,9 +352,14 @@ onMounted(loadAll);
 
                 <TableRow v-for="item in items" :key="item.id">
                   <TableCell class="font-medium">{{ item.name }}</TableCell>
-                  <TableCell class="text-muted-foreground">{{ item.unit }}</TableCell>
+                  <TableCell class="text-muted-foreground">{{
+                    item.unit
+                  }}</TableCell>
                   <TableCell class="text-right">
-                    <NumberField v-model="quantities[item.id]" :min="0" :step="1">
+                    <NumberField
+                      v-model="quantities[item.id]"
+                      :min="0"
+                      :step="1">
                       <NumberFieldContent class="ml-auto w-32">
                         <NumberFieldDecrement />
                         <NumberFieldInput />
@@ -375,15 +394,25 @@ onMounted(loadAll);
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && recentCards.length === 0" :colspan="4">
+              <TableEmpty
+                v-if="!isLoading && recentCards.length === 0"
+                :colspan="4">
                 Aucun shift
               </TableEmpty>
 
               <TableRow v-for="c in recentCards" :key="c.id">
-                <TableCell class="font-medium">{{ formatDate(c.startAt) }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ c.status }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ c.location?.name ?? "—" }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ c._count?.lines ?? c.lines?.length ?? 0 }}</TableCell>
+                <TableCell class="font-medium">{{
+                  formatDate(c.startAt)
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  c.status
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  c.location?.name ?? "—"
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  c._count?.lines ?? c.lines?.length ?? 0
+                }}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -396,16 +425,16 @@ onMounted(loadAll);
         <AlertDialogHeader>
           <AlertDialogTitle>Stopper le shift ?</AlertDialogTitle>
           <AlertDialogDescription>
-            Le shift passera en <span class="font-semibold">SUBMITTED</span> et impactera le stock (vendus depuis le snapshot).
+            Le shift passera en <span class="font-semibold">SUBMITTED</span> et
+            impactera le stock (vendus depuis le snapshot).
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel :disabled="isStopping">Annuler</AlertDialogCancel>
           <AlertDialogAction
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             :disabled="isStopping"
-            @click="onStop"
-          >
+            @click="onStop">
             Confirmer
           </AlertDialogAction>
         </AlertDialogFooter>

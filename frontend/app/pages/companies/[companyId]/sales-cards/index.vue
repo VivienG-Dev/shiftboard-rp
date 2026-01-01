@@ -35,7 +35,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useCompanyShifts } from "~/composables/useCompanyShifts";
-import type { SalesCard, SalesCardStatus } from "~/composables/useCompanyShifts";
+import type {
+  SalesCard,
+  SalesCardStatus,
+} from "~/composables/useCompanyShifts";
 import { useCompanyTeam } from "~/composables/useCompanyTeam";
 import type { MemberRow } from "~/composables/useCompanyTeam";
 import { Eye, Filter, Lock, RefreshCcw } from "lucide-vue-next";
@@ -82,7 +85,10 @@ function formatDate(value: string) {
 }
 
 function itemsSold(card: SalesCard) {
-  return (card.lines ?? []).reduce((sum, l) => sum + (Number(l.quantitySold) || 0), 0);
+  return (card.lines ?? []).reduce(
+    (sum, l) => sum + (Number(l.quantitySold) || 0),
+    0
+  );
 }
 
 const membersByUserId = computed(() => {
@@ -166,9 +172,12 @@ onMounted(async () => {
   <div class="space-y-6">
     <div class="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Rapports (Sales cards)</h1>
+        <h1 class="text-3xl font-bold tracking-tight">
+          Rapports (Sales cards)
+        </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Liste et filtres pour les shifts soumis. Tu peux verrouiller un rapport pour le figer.
+          Liste et filtres pour les shifts soumis. Tu peux verrouiller un
+          rapport pour le figer.
         </p>
       </div>
       <div class="flex gap-2">
@@ -178,10 +187,14 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
-    <div v-if="successMessage" class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
+    <div
+      v-if="successMessage"
+      class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
       {{ successMessage }}
     </div>
 
@@ -204,7 +217,9 @@ onMounted(async () => {
             <Input v-model="to" type="date" />
           </div>
           <div>
-            <div class="mb-1 text-xs font-medium text-muted-foreground">Statut</div>
+            <div class="mb-1 text-xs font-medium text-muted-foreground">
+              Statut
+            </div>
             <NativeSelect v-model="status">
               <option value="ALL">Tous</option>
               <option value="DRAFT">DRAFT</option>
@@ -213,7 +228,9 @@ onMounted(async () => {
             </NativeSelect>
           </div>
           <div>
-            <div class="mb-1 text-xs font-medium text-muted-foreground">Utilisateur</div>
+            <div class="mb-1 text-xs font-medium text-muted-foreground">
+              Utilisateur
+            </div>
             <NativeSelect v-if="members.length > 0" v-model="userId">
               <option value="ALL">Tous</option>
               <option v-for="m in members" :key="m.user.id" :value="m.user.id">
@@ -238,8 +255,7 @@ onMounted(async () => {
               userId = 'ALL';
               refresh();
             "
-            :disabled="isLoading"
-          >
+            :disabled="isLoading">
             Réinitialiser
           </Button>
         </div>
@@ -270,20 +286,31 @@ onMounted(async () => {
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="6" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="6" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="card in cards" :key="card.id">
-                <TableCell class="font-medium">{{ formatDate(card.startAt) }}</TableCell>
+                <TableCell class="font-medium">{{
+                  formatDate(card.startAt)
+                }}</TableCell>
                 <TableCell class="text-muted-foreground">
                   {{ card.endAt ? formatDate(card.endAt) : "—" }}
                 </TableCell>
-                <TableCell class="text-muted-foreground">{{ card.status }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ displayUser(card) }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ itemsSold(card) }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  card.status
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  displayUser(card)
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  itemsSold(card)
+                }}</TableCell>
                 <TableCell class="text-right">
                   <div class="flex justify-end gap-2">
-                    <NuxtLink :to="`/companies/${companyId}/sales-cards/${card.id}`">
+                    <NuxtLink
+                      :to="`/companies/${companyId}/sales-cards/${card.id}`">
                       <Button variant="outline" size="sm">
                         <Eye class="h-4 w-4" />
                       </Button>
@@ -292,8 +319,7 @@ onMounted(async () => {
                       v-if="card.status === 'SUBMITTED'"
                       variant="outline"
                       size="sm"
-                      @click="openLockDialog(card)"
-                    >
+                      @click="openLockDialog(card)">
                       <Lock class="h-4 w-4" />
                     </Button>
                   </div>
@@ -310,16 +336,16 @@ onMounted(async () => {
         <AlertDialogHeader>
           <AlertDialogTitle>Verrouiller ce rapport ?</AlertDialogTitle>
           <AlertDialogDescription>
-            Un rapport verrouillé devient immutable. Cette action est destinée aux managers/admins.
+            Un rapport verrouillé devient immutable. Cette action est destinée
+            aux managers/admins.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel :disabled="isLocking">Annuler</AlertDialogCancel>
           <AlertDialogAction
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             :disabled="isLocking"
-            @click="onLockConfirmed"
-          >
+            @click="onLockConfirmed">
             Verrouiller
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -327,4 +353,3 @@ onMounted(async () => {
     </AlertDialog>
   </div>
 </template>
-

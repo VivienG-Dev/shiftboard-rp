@@ -48,19 +48,32 @@ const categoryOptions: Array<{ value: ItemCategory; label: string }> = [
 
 const schema = toTypedSchema(
   z.object({
-    name: z.string().min(1, "Le nom est requis").max(120, "Le nom est trop long"),
-    category: z.enum(["DRINK", "SOFT_DRINK", "ALCOHOL_DRINK", "BOTTLE", "FOOD", "OTHER"]),
-    unit: z.string().min(1, "L'unité est requise").max(32, "L'unité est trop longue"),
-    basePrice: z
-      .preprocess(
-        (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
-        z.number().min(0, "Prix invalide").optional()
-      ),
-    lowStockThreshold: z
-      .preprocess(
-        (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
-        z.number().int("Doit être un entier").min(0, "Seuil invalide").optional()
-      ),
+    name: z
+      .string()
+      .min(1, "Le nom est requis")
+      .max(120, "Le nom est trop long"),
+    category: z.enum([
+      "DRINK",
+      "SOFT_DRINK",
+      "ALCOHOL_DRINK",
+      "BOTTLE",
+      "FOOD",
+      "OTHER",
+    ]),
+    unit: z
+      .string()
+      .min(1, "L'unité est requise")
+      .max(32, "L'unité est trop longue"),
+    basePrice: z.preprocess(
+      (v) =>
+        v === "" || v === null || v === undefined ? undefined : Number(v),
+      z.number().min(0, "Prix invalide").optional()
+    ),
+    lowStockThreshold: z.preprocess(
+      (v) =>
+        v === "" || v === null || v === undefined ? undefined : Number(v),
+      z.number().int("Doit être un entier").min(0, "Seuil invalide").optional()
+    ),
   })
 );
 
@@ -107,7 +120,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     <div>
       <h1 class="text-3xl font-bold tracking-tight">Ajouter un item</h1>
       <p class="mt-1 text-sm text-muted-foreground">
-        Crée un item (bouteille, boisson, nourriture…). Tu pourras ensuite faire un snapshot pour le stock.
+        Crée un item (bouteille, boisson, nourriture…). Tu pourras ensuite faire
+        un snapshot pour le stock.
       </p>
     </div>
 
@@ -126,7 +140,10 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormItem>
               <FormLabel>Nom <span class="text-red-400">*</span></FormLabel>
               <FormControl>
-                <Input v-bind="componentField" placeholder="Ex: Vodka" autocomplete="off" />
+                <Input
+                  v-bind="componentField"
+                  placeholder="Ex: Vodka"
+                  autocomplete="off" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -135,10 +152,15 @@ const onSubmit = form.handleSubmit(async (values) => {
           <div class="grid gap-4 md:grid-cols-2">
             <FormField v-slot="{ field }" name="category">
               <FormItem>
-                <FormLabel>Catégorie <span class="text-red-400">*</span></FormLabel>
+                <FormLabel
+                  >Catégorie <span class="text-red-400">*</span></FormLabel
+                >
                 <FormControl>
                   <NativeSelect v-bind="field">
-                    <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">
+                    <option
+                      v-for="opt in categoryOptions"
+                      :key="opt.value"
+                      :value="opt.value">
                       {{ opt.label }}
                     </option>
                   </NativeSelect>
@@ -151,9 +173,14 @@ const onSubmit = form.handleSubmit(async (values) => {
               <FormItem>
                 <FormLabel>Unité <span class="text-red-400">*</span></FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" placeholder="Ex: bottle" autocomplete="off" />
+                  <Input
+                    v-bind="componentField"
+                    placeholder="Ex: bottle"
+                    autocomplete="off" />
                 </FormControl>
-                <FormDescription>Exemples: bottle, glass, piece.</FormDescription>
+                <FormDescription
+                  >Exemples: bottle, glass, piece.</FormDescription
+                >
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -164,7 +191,11 @@ const onSubmit = form.handleSubmit(async (values) => {
               <FormItem>
                 <FormLabel>Prix (optionnel)</FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" type="number" min="0" placeholder="Ex: 250" />
+                  <Input
+                    v-bind="componentField"
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 250" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -174,22 +205,27 @@ const onSubmit = form.handleSubmit(async (values) => {
               <FormItem>
                 <FormLabel>Seuil stock faible (optionnel)</FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" type="number" min="0" placeholder="Ex: 3" />
+                  <Input
+                    v-bind="componentField"
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 3" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
           </div>
 
-          <div v-if="generalError" class="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+          <div
+            v-if="generalError"
+            class="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
             {{ generalError }}
           </div>
 
           <Button
-            class="w-full bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             type="submit"
-            :disabled="isLoading"
-          >
+            :disabled="isLoading">
             <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
             {{ isLoading ? "Création..." : "Créer l'item" }}
           </Button>
@@ -204,4 +240,3 @@ const onSubmit = form.handleSubmit(async (values) => {
     </Card>
   </div>
 </template>
-

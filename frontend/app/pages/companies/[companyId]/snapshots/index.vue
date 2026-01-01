@@ -72,19 +72,23 @@ onMounted(refresh);
           Snapshots
         </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Les snapshots sont des inventaires complets (stock-take). Le dernier snapshot sert de baseline pour le stock.
+          Les snapshots sont des inventaires complets (stock-take). Le dernier
+          snapshot sert de baseline pour le stock.
         </p>
       </div>
 
       <NuxtLink :to="`/companies/${companyId}/snapshots/new`">
-        <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+        <Button
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
           <Plus class="mr-2 h-4 w-4" />
           Nouveau snapshot
         </Button>
       </NuxtLink>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -105,18 +109,28 @@ onMounted(refresh);
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && snapshots.length === 0" :colspan="4">
+              <TableEmpty
+                v-if="!isLoading && snapshots.length === 0"
+                :colspan="4">
                 Aucun snapshot
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="4" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="4" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="s in snapshots" :key="s.id">
-                <TableCell class="font-medium">{{ formatDate(s.createdAt) }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ s.note ?? "—" }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ s._count.lines }}</TableCell>
+                <TableCell class="font-medium">{{
+                  formatDate(s.createdAt)
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  s.note ?? "—"
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  s._count.lines
+                }}</TableCell>
                 <TableCell class="text-right">
                   <NuxtLink :to="`/companies/${companyId}/snapshots/${s.id}`">
                     <Button variant="outline" size="sm">Voir</Button>
@@ -130,4 +144,3 @@ onMounted(refresh);
     </Card>
   </div>
 </template>
-

@@ -64,9 +64,7 @@ const categoryOptions: Array<{ value: ItemCategory | "ALL"; label: string }> = [
 ];
 
 function formatCategory(value: ItemCategory) {
-  return (
-    categoryOptions.find((o) => o.value === value)?.label ?? value
-  );
+  return categoryOptions.find((o) => o.value === value)?.label ?? value;
 }
 
 function formatMoney(value: number | null) {
@@ -126,19 +124,23 @@ onMounted(refresh);
       <div>
         <h1 class="text-3xl font-bold tracking-tight">Inventaire</h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Crée des items (bouteilles, boissons, nourriture…). Ensuite tu pourras faire un snapshot et suivre le stock.
+          Crée des items (bouteilles, boissons, nourriture…). Ensuite tu pourras
+          faire un snapshot et suivre le stock.
         </p>
       </div>
 
       <NuxtLink :to="`/companies/${companyId}/items/new`">
-        <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+        <Button
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
           <Plus class="mr-2 h-4 w-4" />
           Ajouter un item
         </Button>
       </NuxtLink>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -150,12 +152,16 @@ onMounted(refresh);
       <CardContent class="space-y-4">
         <div class="grid gap-3 md:grid-cols-3">
           <div class="relative">
-            <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input v-model="search" class="pl-9" placeholder="Rechercher…" />
           </div>
 
           <NativeSelect v-model="category">
-            <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">
+            <option
+              v-for="opt in categoryOptions"
+              :key="opt.value"
+              :value="opt.value">
               {{ opt.label }}
             </option>
           </NativeSelect>
@@ -184,7 +190,9 @@ onMounted(refresh);
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="6" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="6" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="item in items" :key="item.id">
@@ -193,21 +201,27 @@ onMounted(refresh);
                     <span>{{ item.name }}</span>
                     <span
                       v-if="item.archivedAt"
-                      class="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                    >
+                      class="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                       Archivé
                     </span>
                   </div>
                 </TableCell>
-                <TableCell class="text-muted-foreground">{{ formatCategory(item.category) }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ item.unit }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ formatMoney(item.basePrice) }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  formatCategory(item.category)
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  item.unit
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  formatMoney(item.basePrice)
+                }}</TableCell>
                 <TableCell class="text-muted-foreground">
                   {{ item.lowStockThreshold ?? "—" }}
                 </TableCell>
                 <TableCell class="text-right">
                   <div class="flex justify-end gap-2">
-                    <NuxtLink :to="`/companies/${companyId}/items/${item.id}/edit`">
+                    <NuxtLink
+                      :to="`/companies/${companyId}/items/${item.id}/edit`">
                       <Button variant="outline" size="sm">
                         <Pencil class="h-4 w-4" />
                       </Button>
@@ -219,8 +233,7 @@ onMounted(refresh);
                       @click="
                         itemToArchive = item;
                         isArchiveDialogOpen = true;
-                      "
-                    >
+                      ">
                       <Archive class="h-4 w-4" />
                     </Button>
                   </div>
@@ -239,15 +252,15 @@ onMounted(refresh);
           <AlertDialogDescription>
             <span v-if="itemToArchive">“{{ itemToArchive.name }}”</span>
             <span v-else>Cet item</span>
-            ne sera plus sélectionnable pour les nouveaux snapshots/restocks/shifts.
+            ne sera plus sélectionnable pour les nouveaux
+            snapshots/restocks/shifts.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
           <AlertDialogAction
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
-            @click="onArchiveConfirmed"
-          >
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            @click="onArchiveConfirmed">
             Archiver
           </AlertDialogAction>
         </AlertDialogFooter>

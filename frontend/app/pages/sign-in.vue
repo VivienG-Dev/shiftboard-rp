@@ -80,7 +80,7 @@ const togglePasswordVisibility = () => {
 
 <template>
   <div
-    class="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-muted/40 to-background text-foreground">
+    class="relative min-h-screen overflow-hidden bg-linear-to-br from-background via-muted/40 to-background text-foreground">
     <div
       class="pointer-events-none absolute inset-0 [background:radial-gradient(1000px_circle_at_15%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(900px_circle_at_85%_35%,rgba(225,29,72,0.14),transparent_55%)]" />
 
@@ -88,9 +88,11 @@ const togglePasswordVisibility = () => {
       <!-- Left: form -->
       <div class="flex items-center justify-center px-6 py-10">
         <div class="w-full max-w-md">
-          <NuxtLink to="/" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <span
-              class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
+              class="grid h-9 w-9 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
               SB
             </span>
             <span class="font-semibold tracking-tight">ShiftBoard RP</span>
@@ -127,7 +129,8 @@ const togglePasswordVisibility = () => {
                         <Input
                           :type="isPasswordVisible ? 'text' : 'password'"
                           v-bind="componentField" />
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <div
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center">
                           <Eye
                             v-if="isPasswordVisible"
                             @click="togglePasswordVisibility"
@@ -143,12 +146,14 @@ const togglePasswordVisibility = () => {
                   </FormItem>
                 </FormField>
 
-                <div v-if="generalError" class="text-center text-red-500 text-sm">
+                <div
+                  v-if="generalError"
+                  class="text-center text-red-500 text-sm">
                   {{ generalError }}
                 </div>
 
                 <Button
-                  class="w-full bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+                  class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
                   type="submit"
                   :disabled="isLoading">
                   <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
@@ -157,11 +162,16 @@ const togglePasswordVisibility = () => {
               </form>
             </CardContent>
 
-            <CardFooter class="flex flex-wrap items-center justify-between gap-2">
-              <NuxtLink class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4" to="/">
+            <CardFooter
+              class="flex flex-wrap items-center justify-between gap-2">
+              <NuxtLink
+                class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+                to="/">
                 Back to home
               </NuxtLink>
-              <NuxtLink class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4" to="/sign-up">
+              <NuxtLink
+                class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+                to="/sign-up">
                 Create account
               </NuxtLink>
             </CardFooter>
@@ -171,13 +181,18 @@ const togglePasswordVisibility = () => {
 
       <!-- Right: visual -->
       <div class="relative hidden lg:block">
-        <div class="absolute inset-0 bg-[url('/images/ls-skyline.svg')] bg-cover bg-center opacity-80" />
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+        <div
+          class="absolute inset-0 bg-[url('/images/ls-skyline.svg')] bg-cover bg-center opacity-80" />
+        <div
+          class="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
         <div class="relative h-full p-10">
           <div class="max-w-lg">
-            <h2 class="text-4xl font-bold tracking-tight">Night shift in Los Santos</h2>
+            <h2 class="text-4xl font-bold tracking-tight">
+              Night shift in Los Santos
+            </h2>
             <p class="mt-4 text-muted-foreground">
-              Track every bottle, every drink, every shift. Keep your RP business running clean.
+              Track every bottle, every drink, every shift. Keep your RP
+              business running clean.
             </p>
           </div>
         </div>

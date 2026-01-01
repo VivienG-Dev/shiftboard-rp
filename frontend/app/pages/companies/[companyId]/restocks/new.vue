@@ -55,7 +55,8 @@ async function loadItems() {
     const res = await listItems(companyId.value, { activeOnly: true });
     items.value = (res.data ?? []).filter((i) => !i.archivedAt);
     const next: Record<string, number | null | undefined> = {};
-    for (const item of items.value) next[item.id] = quantities.value[item.id] ?? null;
+    for (const item of items.value)
+      next[item.id] = quantities.value[item.id] ?? null;
     quantities.value = next;
   } catch (error: unknown) {
     const message =
@@ -87,7 +88,10 @@ async function onSubmit() {
   isSaving.value = true;
   try {
     const lines = Object.entries(quantities.value)
-      .map(([itemId, qty]) => ({ itemId, quantityAdded: parsePositiveInt(qty) }))
+      .map(([itemId, qty]) => ({
+        itemId,
+        quantityAdded: parsePositiveInt(qty),
+      }))
       .filter((l) => l.quantityAdded !== null);
 
     if (lines.some((l) => Number.isNaN(l.quantityAdded))) {
@@ -129,7 +133,9 @@ onMounted(loadItems);
       </p>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -164,12 +170,16 @@ onMounted(loadItems);
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="3" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="3" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="item in items" :key="item.id">
                 <TableCell class="font-medium">{{ item.name }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ item.unit }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  item.unit
+                }}</TableCell>
                 <TableCell class="text-right">
                   <NumberField v-model="quantities[item.id]" :min="1" :step="1">
                     <NumberFieldContent class="ml-auto w-32">
@@ -190,10 +200,9 @@ onMounted(loadItems);
           <Button variant="ghost">Retour</Button>
         </NuxtLink>
         <Button
-          class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
           :disabled="isSaving || items.length === 0"
-          @click="onSubmit"
-        >
+          @click="onSubmit">
           <Loader2 v-if="isSaving" class="mr-2 h-4 w-4 animate-spin" />
           <Save v-else class="mr-2 h-4 w-4" />
           {{ isSaving ? "Création..." : "Créer le restock" }}

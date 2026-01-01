@@ -6,7 +6,14 @@ definePageMeta({
 });
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import {
@@ -117,7 +124,8 @@ onMounted(refresh);
           Invitations
         </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Crée un code d’invitation lié à un email. L’utilisateur accepte via son compte.
+          Crée un code d’invitation lié à un email. L’utilisateur accepte via
+          son compte.
         </p>
       </div>
 
@@ -126,33 +134,45 @@ onMounted(refresh);
       </NuxtLink>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
-    <div v-if="successMessage" class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
+    <div
+      v-if="successMessage"
+      class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
       {{ successMessage }}
     </div>
 
     <Card class="border-border bg-card/60">
       <CardHeader class="space-y-1">
         <CardTitle class="text-lg">Créer une invitation</CardTitle>
-        <CardDescription>Le code doit être accepté par un compte avec le même email.</CardDescription>
+        <CardDescription
+          >Le code doit être accepté par un compte avec le même
+          email.</CardDescription
+        >
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="grid gap-3 md:grid-cols-3">
           <Input v-model="email" type="email" placeholder="email@exemple.com" />
           <NativeSelect v-model="roleId">
-            <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</option>
+            <option v-for="r in roles" :key="r.id" :value="r.id">
+              {{ r.name }}
+            </option>
           </NativeSelect>
-          <Input v-model="expiresInHours" type="number" min="1" placeholder="72" />
+          <Input
+            v-model="expiresInHours"
+            type="number"
+            min="1"
+            placeholder="72" />
         </div>
       </CardContent>
       <CardFooter class="flex justify-end">
         <Button
-          class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
           :disabled="isCreating || !email || !roleId"
-          @click="onCreate"
-        >
+          @click="onCreate">
           {{ isCreating ? "Création..." : "Créer" }}
         </Button>
       </CardFooter>
@@ -182,19 +202,29 @@ onMounted(refresh);
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && invites.length === 0" :colspan="5">
+              <TableEmpty
+                v-if="!isLoading && invites.length === 0"
+                :colspan="5">
                 Aucune invitation
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="5" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="5" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="inv in invites" :key="inv.id">
                 <TableCell class="font-medium">{{ inv.email }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ inv.code }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ inv.status }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ formatDate(inv.expiresAt) }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  inv.code
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  inv.status
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  formatDate(inv.expiresAt)
+                }}</TableCell>
                 <TableCell class="text-right">
                   <Button variant="outline" size="sm" @click="copy(inv.code)">
                     <Copy class="h-4 w-4" />
@@ -208,4 +238,3 @@ onMounted(refresh);
     </Card>
   </div>
 </template>
-

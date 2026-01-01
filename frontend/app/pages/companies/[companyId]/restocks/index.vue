@@ -72,19 +72,23 @@ onMounted(refresh);
           Restocks
         </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Les restocks ajoutent du stock (livraisons). Ils augmentent le stock depuis le dernier snapshot.
+          Les restocks ajoutent du stock (livraisons). Ils augmentent le stock
+          depuis le dernier snapshot.
         </p>
       </div>
 
       <NuxtLink :to="`/companies/${companyId}/restocks/new`">
-        <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+        <Button
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
           <Plus class="mr-2 h-4 w-4" />
           Nouveau restock
         </Button>
       </NuxtLink>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -105,18 +109,28 @@ onMounted(refresh);
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && restocks.length === 0" :colspan="4">
+              <TableEmpty
+                v-if="!isLoading && restocks.length === 0"
+                :colspan="4">
                 Aucun restock
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="4" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="4" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="r in restocks" :key="r.id">
-                <TableCell class="font-medium">{{ formatDate(r.createdAt) }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ r.note ?? "—" }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ r._count.lines }}</TableCell>
+                <TableCell class="font-medium">{{
+                  formatDate(r.createdAt)
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  r.note ?? "—"
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  r._count.lines
+                }}</TableCell>
                 <TableCell class="text-right">
                   <NuxtLink :to="`/companies/${companyId}/restocks/${r.id}`">
                     <Button variant="outline" size="sm">Voir</Button>
@@ -130,4 +144,3 @@ onMounted(refresh);
     </Card>
   </div>
 </template>
-

@@ -72,7 +72,8 @@ onMounted(load);
           Snapshot
         </h1>
         <p class="mt-1 text-sm text-muted-foreground" v-if="snapshot">
-          {{ formatDate(snapshot.createdAt) }} • {{ snapshot.lines.length }} ligne(s)
+          {{ formatDate(snapshot.createdAt) }} •
+          {{ snapshot.lines.length }} ligne(s)
         </p>
       </div>
 
@@ -81,14 +82,17 @@ onMounted(load);
           <Button variant="outline">Voir stock</Button>
         </NuxtLink>
         <NuxtLink :to="`/companies/${companyId}/snapshots/new`">
-          <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+          <Button
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
             Nouveau snapshot
           </Button>
         </NuxtLink>
       </div>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -110,7 +114,9 @@ onMounted(load);
             <TableBody>
               <TableRow v-for="line in snapshot.lines" :key="line.id">
                 <TableCell class="font-medium">{{ line.item.name }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ line.item.unit }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  line.item.unit
+                }}</TableCell>
                 <TableCell class="text-right">{{ line.quantity }}</TableCell>
               </TableRow>
             </TableBody>
@@ -124,4 +130,3 @@ onMounted(load);
     </div>
   </div>
 </template>
-

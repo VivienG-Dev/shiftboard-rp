@@ -91,7 +91,10 @@ async function onSubmit() {
   try {
     const lines = Object.entries(quantities.value)
       .map(([itemId, qty]) => ({ itemId, qty }))
-      .map(({ itemId, qty }) => ({ itemId, quantity: parseNonNegativeInt(qty) }))
+      .map(({ itemId, qty }) => ({
+        itemId,
+        quantity: parseNonNegativeInt(qty),
+      }))
       .filter((l) => l.quantity !== null);
 
     if (lines.some((l) => Number.isNaN(l.quantity))) {
@@ -130,11 +133,14 @@ onMounted(loadItems);
         Nouveau snapshot
       </h1>
       <p class="mt-1 text-sm text-muted-foreground">
-        Saisis les quantités actuelles. Le stock sera calculé à partir de ce snapshot.
+        Saisis les quantités actuelles. Le stock sera calculé à partir de ce
+        snapshot.
       </p>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -151,7 +157,9 @@ onMounted(loadItems);
     <Card class="border-border bg-card/60">
       <CardHeader class="space-y-1">
         <CardTitle class="text-lg">Quantités</CardTitle>
-        <CardDescription>Tu peux laisser vide les items non comptés.</CardDescription>
+        <CardDescription
+          >Tu peux laisser vide les items non comptés.</CardDescription
+        >
       </CardHeader>
       <CardContent>
         <div class="rounded-xl border border-border bg-background/40">
@@ -169,12 +177,16 @@ onMounted(loadItems);
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="3" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="3" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow v-for="item in items" :key="item.id">
                 <TableCell class="font-medium">{{ item.name }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ item.unit }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  item.unit
+                }}</TableCell>
                 <TableCell class="text-right">
                   <NumberField v-model="quantities[item.id]" :min="0" :step="1">
                     <NumberFieldContent class="ml-auto w-32">
@@ -195,10 +207,9 @@ onMounted(loadItems);
           <Button variant="ghost">Retour</Button>
         </NuxtLink>
         <Button
-          class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
           :disabled="isSaving || items.length === 0"
-          @click="onSubmit"
-        >
+          @click="onSubmit">
           <Loader2 v-if="isSaving" class="mr-2 h-4 w-4 animate-spin" />
           <Save v-else class="mr-2 h-4 w-4" />
           {{ isSaving ? "Création..." : "Créer le snapshot" }}

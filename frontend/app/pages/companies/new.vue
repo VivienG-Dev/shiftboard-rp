@@ -103,7 +103,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           to="/companies"
           class="flex items-center gap-3 hover:opacity-95">
           <div
-            class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
+            class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
             SB
           </div>
           <div>
@@ -194,7 +194,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             </div>
 
             <Button
-              class="w-full bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+              class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
               type="submit"
               :disabled="isLoading">
               <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />

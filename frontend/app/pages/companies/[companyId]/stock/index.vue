@@ -78,7 +78,8 @@ onMounted(refresh);
           Stock
         </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Stock calculé à partir du dernier snapshot + ventes soumises + restocks.
+          Stock calculé à partir du dernier snapshot + ventes soumises +
+          restocks.
         </p>
       </div>
 
@@ -90,7 +91,8 @@ onMounted(refresh);
           <Button variant="outline">Restocks</Button>
         </NuxtLink>
         <NuxtLink :to="`/companies/${companyId}/snapshots/new`">
-          <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+          <Button
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
             <Camera class="mr-2 h-4 w-4" />
             Nouveau snapshot
           </Button>
@@ -98,7 +100,9 @@ onMounted(refresh);
       </div>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
@@ -136,31 +140,43 @@ onMounted(refresh);
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="8" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="8" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
 
               <TableRow
                 v-for="row in rows"
                 :key="row.itemId"
-                :class="row.isLowStock ? 'bg-red-500/5' : ''"
-              >
+                :class="row.isLowStock ? 'bg-red-500/5' : ''">
                 <TableCell class="font-medium">
                   <div class="flex items-center gap-2">
                     <span>{{ row.name }}</span>
                     <span
                       v-if="row.isLowStock"
-                      class="rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-xs text-red-200"
-                    >
+                      class="rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-xs text-red-200">
                       Stock faible
                     </span>
                   </div>
                 </TableCell>
-                <TableCell class="text-muted-foreground">{{ categoryLabels[row.category] }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ row.unit }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ row.baselineQuantity }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ row.soldSinceBaseline }}</TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ row.restockedSinceBaseline }}</TableCell>
-                <TableCell class="text-right font-semibold">{{ row.currentStock }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  categoryLabels[row.category]
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  row.unit
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  row.baselineQuantity
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  row.soldSinceBaseline
+                }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  row.restockedSinceBaseline
+                }}</TableCell>
+                <TableCell class="text-right font-semibold">{{
+                  row.currentStock
+                }}</TableCell>
                 <TableCell class="text-right text-muted-foreground">
                   {{ row.lowStockThreshold ?? "—" }}
                 </TableCell>

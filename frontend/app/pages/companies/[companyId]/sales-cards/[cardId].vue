@@ -74,7 +74,10 @@ function formatDate(value: string) {
 }
 
 function computeItemsSold(c: SalesCard) {
-  return (c.lines ?? []).reduce((sum, l) => sum + (Number(l.quantitySold) || 0), 0);
+  return (c.lines ?? []).reduce(
+    (sum, l) => sum + (Number(l.quantitySold) || 0),
+    0
+  );
 }
 
 function computeRevenue(c: SalesCard) {
@@ -152,18 +155,21 @@ onMounted(refresh);
         <Button
           v-if="card && card.status === 'SUBMITTED'"
           variant="outline"
-          @click="isLockDialogOpen = true"
-        >
+          @click="isLockDialogOpen = true">
           <Lock class="mr-2 h-4 w-4" />
           Verrouiller
         </Button>
       </div>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
-    <div v-if="successMessage" class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
+    <div
+      v-if="successMessage"
+      class="rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
       {{ successMessage }}
     </div>
 
@@ -175,11 +181,15 @@ onMounted(refresh);
       <CardContent class="grid gap-3 md:grid-cols-3">
         <div class="rounded-lg border border-border bg-background/40 p-3">
           <div class="text-xs text-muted-foreground">Items vendus</div>
-          <div class="mt-1 text-xl font-semibold">{{ computeItemsSold(card) }}</div>
+          <div class="mt-1 text-xl font-semibold">
+            {{ computeItemsSold(card) }}
+          </div>
         </div>
         <div class="rounded-lg border border-border bg-background/40 p-3">
           <div class="text-xs text-muted-foreground">Revenu estimé</div>
-          <div class="mt-1 text-xl font-semibold">{{ formatMoney(computeRevenue(card)) }}</div>
+          <div class="mt-1 text-xl font-semibold">
+            {{ formatMoney(computeRevenue(card)) }}
+          </div>
         </div>
         <div class="rounded-lg border border-border bg-background/40 p-3">
           <div class="text-xs text-muted-foreground">Fin</div>
@@ -207,19 +217,30 @@ onMounted(refresh);
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && (!card || card.lines.length === 0)" :colspan="4">
+              <TableEmpty
+                v-if="!isLoading && (!card || card.lines.length === 0)"
+                :colspan="4">
                 Aucune ligne
               </TableEmpty>
               <TableRow v-if="isLoading">
-                <TableCell colspan="4" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="4" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
               </TableRow>
               <TableRow v-for="line in card?.lines ?? []" :key="line.id">
-                <TableCell class="font-medium">{{ line.item?.name ?? line.itemId }}</TableCell>
+                <TableCell class="font-medium">{{
+                  line.item?.name ?? line.itemId
+                }}</TableCell>
                 <TableCell class="text-muted-foreground">
-                  {{ line.quantitySold }} <span class="text-xs">{{ line.item?.unit ?? "" }}</span>
+                  {{ line.quantitySold }}
+                  <span class="text-xs">{{ line.item?.unit ?? "" }}</span>
                 </TableCell>
-                <TableCell class="text-right text-muted-foreground">{{ formatMoney(line.unitPrice) }}</TableCell>
-                <TableCell class="text-right font-semibold">{{ formatMoney(line.total) }}</TableCell>
+                <TableCell class="text-right text-muted-foreground">{{
+                  formatMoney(line.unitPrice)
+                }}</TableCell>
+                <TableCell class="text-right font-semibold">{{
+                  formatMoney(line.total)
+                }}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -238,10 +259,9 @@ onMounted(refresh);
         <AlertDialogFooter>
           <AlertDialogCancel :disabled="isLocking">Annuler</AlertDialogCancel>
           <AlertDialogAction
-            class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             :disabled="isLocking"
-            @click="onLock"
-          >
+            @click="onLock">
             Verrouiller
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -249,4 +269,3 @@ onMounted(refresh);
     </AlertDialog>
   </div>
 </template>
-

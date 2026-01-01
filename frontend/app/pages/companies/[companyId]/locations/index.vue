@@ -52,31 +52,40 @@ onMounted(refresh);
       <div>
         <h1 class="text-3xl font-bold tracking-tight">Lieux</h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Les lieux représentent tes branches (ex: Paris, New York). Les shifts pourront être attachés à un lieu.
+          Les lieux représentent tes branches (ex: Paris, New York). Les shifts
+          pourront être attachés à un lieu.
         </p>
       </div>
       <NuxtLink :to="`/companies/${companyId}/locations/new`">
-        <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+        <Button
+          class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
           <Plus class="mr-2 h-4 w-4" />
           Ajouter un lieu
         </Button>
       </NuxtLink>
     </div>
 
-    <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+    <div
+      v-if="errorMessage"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
       {{ errorMessage }}
     </div>
 
-    <div v-if="isLoading" class="text-sm text-muted-foreground">Chargement…</div>
+    <div v-if="isLoading" class="text-sm text-muted-foreground">
+      Chargement…
+    </div>
 
-    <div v-else-if="locations.length === 0" class="rounded-2xl border border-border bg-card/60 p-8">
+    <div
+      v-else-if="locations.length === 0"
+      class="rounded-2xl border border-border bg-card/60 p-8">
       <div class="text-lg font-semibold">Aucun lieu</div>
       <div class="mt-2 text-sm text-muted-foreground">
         Ajoute ton premier lieu (ex: “Los Santos”, “Paris”…).
       </div>
       <div class="mt-6">
         <NuxtLink :to="`/companies/${companyId}/locations/new`">
-          <Button class="bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+          <Button
+            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
             Ajouter un lieu
           </Button>
         </NuxtLink>
@@ -84,7 +93,10 @@ onMounted(refresh);
     </div>
 
     <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Card v-for="loc in locations" :key="loc.id" class="border-border bg-card/60">
+      <Card
+        v-for="loc in locations"
+        :key="loc.id"
+        class="border-border bg-card/60">
         <CardHeader class="space-y-1">
           <CardTitle class="flex items-center gap-2 text-lg">
             <MapPin class="h-4 w-4" />

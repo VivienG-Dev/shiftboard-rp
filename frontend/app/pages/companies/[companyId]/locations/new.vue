@@ -76,7 +76,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     <div>
       <h1 class="text-3xl font-bold tracking-tight">Ajouter un lieu</h1>
       <p class="mt-1 text-sm text-muted-foreground">
-        Exemple: “Los Santos”, “Paris”, “New York”… Un lieu représente une branche.
+        Exemple: “Los Santos”, “Paris”, “New York”… Un lieu représente une
+        branche.
       </p>
     </div>
 
@@ -86,7 +87,9 @@ const onSubmit = form.handleSubmit(async (values) => {
           <MapPin class="h-5 w-5" />
           Nouveau lieu
         </CardTitle>
-        <CardDescription>Crée un lieu pour organiser les shifts et filtres.</CardDescription>
+        <CardDescription
+          >Crée un lieu pour organiser les shifts et filtres.</CardDescription
+        >
       </CardHeader>
 
       <CardContent>
@@ -95,7 +98,10 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormItem>
               <FormLabel>Nom <span class="text-red-400">*</span></FormLabel>
               <FormControl>
-                <Input v-bind="componentField" placeholder="Ex: Los Santos" autocomplete="off" />
+                <Input
+                  v-bind="componentField"
+                  placeholder="Ex: Los Santos"
+                  autocomplete="off" />
               </FormControl>
               <FormDescription>
                 Utilise un nom court et clair. Tu pourras en ajouter plusieurs.
@@ -104,12 +110,14 @@ const onSubmit = form.handleSubmit(async (values) => {
             </FormItem>
           </FormField>
 
-          <div v-if="generalError" class="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+          <div
+            v-if="generalError"
+            class="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
             {{ generalError }}
           </div>
 
           <Button
-            class="w-full bg-gradient-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+            class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
             type="submit"
             :disabled="isLoading">
             <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
