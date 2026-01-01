@@ -499,6 +499,7 @@ Using layout: `dashboard.vue`
   - `GET /companies/:companyId/charts/sales-by-day`
   - `GET /companies/:companyId/charts/sales-by-month`
   - `GET /companies/:companyId/charts/sales?bucket=hour|day|month`
+  - `GET /companies/:companyId/charts/sales-timeseries?interval=hour&from=...&to=...`
 
 ### Phase 4 — Polish
 

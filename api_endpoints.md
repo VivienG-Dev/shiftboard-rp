@@ -876,6 +876,31 @@ Query:
 
 **Response**: same shape as the corresponding endpoint (`sales-by-hour`, `sales-by-day`, `sales-by-month`).
 
+### GET `/companies/:companyId/charts/sales-timeseries`
+
+Chronological time series for the selected interval (recommended for line/area charts).
+
+This differs from `sales-by-hour`: it buckets on an actual timeline (e.g. `2025-01-01T00:00` then `01:00` then `02:00`), so data around midnight doesn’t “overlap” into the same `00h` bucket across different days.
+
+**Auth**: membership required + `stats.read` (or `OWNER`)
+
+Query:
+
+- `interval` = `hour` (currently supported)
+- `from` / `to` (iso, required)
+- `tzOffsetMinutes` (optional integer; defaults to `0`)
+
+**Response**
+
+```json
+{
+  "data": [
+    { "ts": "2025-01-01T00:00:00.000Z", "revenue": 0, "itemsSold": 0 },
+    { "ts": "2025-01-01T01:00:00.000Z", "revenue": 1200, "itemsSold": 8 }
+  ]
+}
+```
+
 ---
 
 ## Notes / Open Questions
