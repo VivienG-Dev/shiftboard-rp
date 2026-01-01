@@ -47,7 +47,7 @@ const isSaving = ref(false);
 const errorMessage = ref<string | null>(null);
 const note = ref<string>("");
 
-const quantities = ref<Record<string, string | number | null | undefined>>({});
+const quantities = ref<Record<string, number | null | undefined>>({});
 
 async function loadItems() {
   isLoading.value = true;
@@ -55,9 +55,9 @@ async function loadItems() {
   try {
     const res = await listItems(companyId.value, { activeOnly: true });
     items.value = (res.data ?? []).filter((i) => !i.archivedAt);
-    const next: Record<string, string | number | null | undefined> = {};
+    const next: Record<string, number | null | undefined> = {};
     for (const item of items.value) {
-      next[item.id] = quantities.value[item.id] ?? "";
+      next[item.id] = quantities.value[item.id] ?? null;
     }
     quantities.value = next;
   } catch (error: unknown) {

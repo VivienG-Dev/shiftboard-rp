@@ -81,7 +81,7 @@ const startNote = ref("");
 const startLocationId = ref<string>("");
 
 const editNote = ref("");
-const quantities = ref<Record<string, string | number | null | undefined>>({});
+const quantities = ref<Record<string, number | null | undefined>>({});
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -122,10 +122,10 @@ function hydrateFromCard(card: SalesCard | null) {
 
   editNote.value = card.note ?? "";
 
-  const next: Record<string, string> = {};
-  for (const item of items.value) next[item.id] = "";
+  const next: Record<string, number | null | undefined> = {};
+  for (const item of items.value) next[item.id] = null;
   for (const line of card.lines ?? []) {
-    next[line.itemId] = String(line.quantitySold);
+    next[line.itemId] = line.quantitySold;
   }
   quantities.value = next;
 }
