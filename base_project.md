@@ -479,6 +479,7 @@ Using layout: `dashboard.vue`
 
 - Auth system
 - Create company
+- Company settings (name/type/slug + archive)
 - Invite members
 - Basic dashboard layout
 - CRUD items

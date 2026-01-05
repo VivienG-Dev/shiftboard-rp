@@ -217,7 +217,27 @@ Update company settings.
 **Body** (partial)
 
 ```json
-{ "name": "string", "slug": "string" }
+{ "name": "string", "slug": "string|null", "type": "BAR|CLUB|FAST_FOOD|OTHER" }
+```
+
+Notes:
+
+- `slug: null` (or empty string) removes the slug.
+- `slug` is slugified server-side.
+
+**Response**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "slug": "string|null",
+    "type": "BAR|CLUB|FAST_FOOD|OTHER",
+    "ownerId": "uuid",
+    "locations": [{ "id": "uuid", "companyId": "uuid", "name": "Paris" }]
+  }
+}
 ```
 
 ### POST `/companies/:companyId/archive`
@@ -225,6 +245,17 @@ Update company settings.
 Archive a company.
 
 **Auth**: `company.archive` (or `OWNER`)
+
+**Response**
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "archivedAt": "iso"
+  }
+}
+```
 
 ---
 
