@@ -222,4 +222,93 @@ export class CompaniesService {
 
     return membership.company;
   }
+
+  async updateCompany(
+    userId: string,
+    companyId: string,
+    input: { name?: string; slug?: string | null; type?: CompanyType },
+  ) {
+    await this.getCompany(userId, companyId);
+
+    const data: { name?: string; slug?: string | null; type?: CompanyType } = {};
+
+    if (input.name !== undefined) {
+      const name = input.name?.trim();
+      if (!name) throw new BadRequestException('Company name is required');
+      data.name = name;
+    }
+
+    if (input.slug !== undefined) {
+      const raw = input.slug === null ? '' : String(input.slug ?? '');
+      const trimmed = raw.trim();
+      if (!trimmed) data.slug = null;
+      else {
+        const slug = slugify(trimmed);
+        if (!slug) throw new BadRequestException('Invalid slug');
+        data.slug = slug;
+      }
+    }
+
+    if (input.type !== undefined) {
+      data.type = input.type;
+    }
+
+    if (!Object.keys(data).length) {
+      throw new BadRequestException('No fields to update');
+    }
+
+    try {
+      return await this.prisma.company.update({
+        where: { id: companyId },
+        data,
+        include: {
+          locations: {
+            where: { archivedAt: null },
+            orderBy: { createdAt: 'desc' },
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const fields = extractUniqueConstraintFields(error);
+        const field = fields.includes('slug') ? 'slug' : fields.includes('name') ? 'name' : fields[0];
+
+        const message =
+          field === 'slug'
+            ? 'A company with this slug already exists'
+            : field === 'name'
+              ? 'You already have a company with this name'
+              : 'A company with this name/slug already exists';
+
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.CONFLICT,
+            error: 'Conflict',
+            message,
+            field,
+            fields,
+            code: error.code,
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+      throw error;
+    }
+  }
+
+  async archiveCompany(userId: string, companyId: string) {
+    await this.getCompany(userId, companyId);
+
+    const company = await this.prisma.company.findFirst({
+      where: { id: companyId },
+      select: { archivedAt: true },
+    });
+    if (!company) throw new ForbiddenException('No access to this company');
+    if (company.archivedAt) throw new BadRequestException('Company already archived');
+
+    return this.prisma.company.update({
+      where: { id: companyId },
+      data: { archivedAt: new Date() },
+    });
+  }
 }

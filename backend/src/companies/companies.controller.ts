@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
+import { RequirePermissions } from '../auth/permissions.decorator';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { CreateCompanyLocationDto } from './dto/create-company-location.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Controller('companies')
 export class CompaniesController {
@@ -47,5 +49,24 @@ export class CompaniesController {
     @Param('companyId') companyId: string,
   ) {
     return { data: await this.companiesService.getCompany(session.user.id, companyId) };
+  }
+
+  @Patch(':companyId')
+  @RequirePermissions('company.update')
+  async updateCompany(
+    @Session() session: UserSession,
+    @Param('companyId') companyId: string,
+    @Body() body: UpdateCompanyDto,
+  ) {
+    return { data: await this.companiesService.updateCompany(session.user.id, companyId, body) };
+  }
+
+  @Post(':companyId/archive')
+  @RequirePermissions('company.archive')
+  async archiveCompany(
+    @Session() session: UserSession,
+    @Param('companyId') companyId: string,
+  ) {
+    return { data: await this.companiesService.archiveCompany(session.user.id, companyId) };
   }
 }

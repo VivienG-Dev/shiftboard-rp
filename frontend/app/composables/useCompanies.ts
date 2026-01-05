@@ -38,6 +38,11 @@ type CreateCompanyLocationInput = {
 
 type CreateCompanyLocationResponse = { data: CompanyLocation };
 
+type UpdateCompanyInput = Partial<Pick<Company, "name" | "slug" | "type">>;
+type UpdateCompanyResponse = { data: Company };
+
+type ArchiveCompanyResponse = { data: Company };
+
 export function useCompanies() {
   const runtimeConfig = useRuntimeConfig();
   const backendUrl = normalizeBackendUrl(
@@ -69,6 +74,19 @@ export function useCompanies() {
     return apiFetch<GetCompanyResponse>(`/companies/${companyId}`);
   }
 
+  async function updateCompany(companyId: string, input: UpdateCompanyInput) {
+    return apiFetch<UpdateCompanyResponse>(`/companies/${companyId}`, {
+      method: "PATCH",
+      body: input,
+    });
+  }
+
+  async function archiveCompany(companyId: string) {
+    return apiFetch<ArchiveCompanyResponse>(`/companies/${companyId}/archive`, {
+      method: "POST",
+    });
+  }
+
   async function listCompanyLocations(companyId: string) {
     return apiFetch<ListCompanyLocationsResponse>(`/companies/${companyId}/locations`);
   }
@@ -84,6 +102,8 @@ export function useCompanies() {
     listMyCompanies,
     createCompany,
     getCompany,
+    updateCompany,
+    archiveCompany,
     listCompanyLocations,
     createCompanyLocation,
   };
