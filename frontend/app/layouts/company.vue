@@ -8,6 +8,7 @@ import {
   Moon,
   Package,
   Boxes,
+  Settings,
   Sun,
   User,
   ClipboardList,
@@ -227,6 +228,18 @@ const toggleTheme = () => {
                   <NuxtLink :to="`/companies/${companyId}/team`">
                     <Users />
                     <span>Équipe</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  as-child
+                  :is-active="isActive(`/companies/${companyId}/settings`)"
+                  tooltip="Paramètres">
+                  <NuxtLink :to="`/companies/${companyId}/settings`">
+                    <Settings />
+                    <span>Paramètres</span>
                   </NuxtLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
