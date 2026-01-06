@@ -13,7 +13,7 @@ const { isAuthenticated, session, signOut } = useAuth();
 <template>
   <div class="mx-auto flex w-full max-w-6xl flex-col px-6">
     <header class="flex items-center justify-between py-6">
-      <div class="flex items-center gap-3">
+      <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
         <div
           class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
           SB
@@ -21,29 +21,29 @@ const { isAuthenticated, session, signOut } = useAuth();
         <div>
           <div class="text-sm font-semibold tracking-tight">ShiftBoard RP</div>
           <div class="text-xs text-muted-foreground">
-            Night shift ops, organized.
+            Opérations de shift, organisées.
           </div>
         </div>
-      </div>
+      </NuxtLink>
 
       <div v-if="isAuthenticated" class="flex items-center gap-2">
         <NuxtLink to="/companies">
-          <Button variant="ghost">Dashboard</Button>
+          <Button variant="ghost">Entreprises</Button>
         </NuxtLink>
         <NuxtLink to="/me">
-          <Button variant="ghost">Profile</Button>
+          <Button variant="ghost">Profil</Button>
         </NuxtLink>
-        <Button variant="ghost" @click="signOut">Sign out</Button>
+        <Button variant="ghost" @click="signOut">Déconnexion</Button>
       </div>
 
       <div v-else class="flex items-center gap-2">
         <NuxtLink to="/sign-in">
-          <Button variant="ghost">Sign in</Button>
+          <Button variant="ghost">Connexion</Button>
         </NuxtLink>
         <NuxtLink to="/sign-up">
           <Button
             class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
-            Create account
+            Créer un compte
           </Button>
         </NuxtLink>
       </div>
@@ -53,34 +53,37 @@ const { isAuthenticated, session, signOut } = useAuth();
       <div class="grid items-center gap-10 lg:grid-cols-2">
         <div class="space-y-6">
           <h1 class="text-4xl font-bold tracking-tight md:text-5xl">
-            Run your bar like a business.
+            Gérez votre bar comme une entreprise.
           </h1>
           <p class="max-w-xl text-muted-foreground">
-            Track inventory, shifts, and staff across multiple companies—built
-            for GTA V RP communities.
+            Suivez l’inventaire, les shifts et l’équipe sur plusieurs
+            entreprises — pensé pour les communautés GTA V RP.
           </p>
 
           <div class="flex flex-wrap items-center gap-3">
             <NuxtLink to="/sign-in">
               <Button
                 class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
-                Sign in
+                Connexion
               </Button>
             </NuxtLink>
             <NuxtLink to="/sign-up">
-              <Button variant="outline"> Create account </Button>
+              <Button variant="outline">Créer un compte</Button>
             </NuxtLink>
           </div>
 
           <div
             v-if="isAuthenticated"
             class="rounded-xl border border-border bg-card/60 p-4">
-            <div class="text-xs text-muted-foreground">Signed in</div>
+            <div class="text-xs text-muted-foreground">Connecté</div>
             <div class="mt-3 flex flex-wrap items-center gap-3">
-              <NuxtLink to="/me">
-                <Button variant="secondary">Go to profile</Button>
+              <NuxtLink to="/companies">
+                <Button variant="secondary">Voir mes entreprises</Button>
               </NuxtLink>
-              <Button variant="ghost" @click="signOut">Sign out</Button>
+              <NuxtLink to="/me">
+                <Button variant="outline">Profil</Button>
+              </NuxtLink>
+              <Button variant="ghost" @click="signOut">Déconnexion</Button>
             </div>
             <pre
               class="mt-3 max-h-40 overflow-auto rounded-md bg-muted p-3 text-xs text-muted-foreground"
@@ -100,16 +103,17 @@ const { isAuthenticated, session, signOut } = useAuth();
               class="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
             <div class="relative p-8">
               <div class="text-sm font-semibold tracking-wide text-slate-200">
-                Los Santos Night Shift
+                Shift de nuit à Los Santos
               </div>
               <div class="mt-2 text-xs text-muted-foreground">
-                Keep bottles counted, shifts logged, and cash moving.
+                Gardez les bouteilles comptées, les shifts enregistrés, et la
+                caisse maîtrisée.
               </div>
             </div>
             <div class="relative px-8 pb-8 pt-2">
               <div class="grid gap-3 md:grid-cols-3">
                 <div class="rounded-xl border border-border bg-card/60 p-4">
-                  <div class="text-xs text-muted-foreground">Inventory</div>
+                  <div class="text-xs text-muted-foreground">Inventaire</div>
                   <div class="mt-1 text-lg font-semibold">Snapshots</div>
                 </div>
                 <div class="rounded-xl border border-border bg-card/60 p-4">
@@ -117,8 +121,8 @@ const { isAuthenticated, session, signOut } = useAuth();
                   <div class="mt-1 text-lg font-semibold">Cards</div>
                 </div>
                 <div class="rounded-xl border border-border bg-card/60 p-4">
-                  <div class="text-xs text-muted-foreground">Staff</div>
-                  <div class="mt-1 text-lg font-semibold">Roles</div>
+                  <div class="text-xs text-muted-foreground">Équipe</div>
+                  <div class="mt-1 text-lg font-semibold">Rôles</div>
                 </div>
               </div>
             </div>
