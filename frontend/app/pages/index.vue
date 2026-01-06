@@ -11,13 +11,8 @@ const { isAuthenticated, session, signOut } = useAuth();
 </script>
 
 <template>
-  <div
-    class="relative min-h-screen overflow-hidden bg-linear-to-br from-background via-muted/40 to-background text-foreground">
-    <div
-      class="pointer-events-none absolute inset-0 [background:radial-gradient(1000px_circle_at_15%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(900px_circle_at_85%_35%,rgba(225,29,72,0.14),transparent_55%)]" />
-
-    <header
-      class="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
+  <div class="mx-auto flex w-full max-w-6xl flex-col px-6">
+    <header class="flex items-center justify-between py-6">
       <div class="flex items-center gap-3">
         <div
           class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
@@ -54,7 +49,7 @@ const { isAuthenticated, session, signOut } = useAuth();
       </div>
     </header>
 
-    <main class="relative z-10 mx-auto w-full max-w-6xl px-6 pb-12 pt-10">
+    <main class="flex-1 pb-12 pt-10">
       <div class="grid items-center gap-10 lg:grid-cols-2">
         <div class="space-y-6">
           <h1 class="text-4xl font-bold tracking-tight md:text-5xl">
