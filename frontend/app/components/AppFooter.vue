@@ -11,7 +11,7 @@ const toggleTheme = () => {
 
 <template>
   <footer
-    class="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/70 backdrop-blur">
+    class="border-t border-border bg-background/70 backdrop-blur">
     <div
       class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
       <div class="text-xs text-muted-foreground">ShiftBoard RP • MVP</div>
