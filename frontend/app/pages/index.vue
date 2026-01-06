@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from "~/composables/useAuth";
 import { Button } from "@/components/ui/button";
+import AppNavbar from "@/components/AppNavbar.vue";
 
 definePageMeta({
   layout: "blank",
@@ -11,46 +12,11 @@ const { isAuthenticated, session, signOut } = useAuth();
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-6xl flex-col px-6">
-    <header class="flex items-center justify-between py-6">
-      <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
-        <div
-          class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
-          SB
-        </div>
-        <div>
-          <div class="text-sm font-semibold tracking-tight">ShiftBoard RP</div>
-          <div class="text-xs text-muted-foreground">
-            Opérations de shift, organisées.
-          </div>
-        </div>
-      </NuxtLink>
+  <div class="flex h-full flex-col">
+    <AppNavbar title="ShiftBoard RP" subtitle="Opérations de shift, organisées." />
 
-      <div v-if="isAuthenticated" class="flex items-center gap-2">
-        <NuxtLink to="/companies">
-          <Button variant="ghost">Entreprises</Button>
-        </NuxtLink>
-        <NuxtLink to="/me">
-          <Button variant="ghost">Profil</Button>
-        </NuxtLink>
-        <Button variant="ghost" @click="signOut">Déconnexion</Button>
-      </div>
-
-      <div v-else class="flex items-center gap-2">
-        <NuxtLink to="/sign-in">
-          <Button variant="ghost">Connexion</Button>
-        </NuxtLink>
-        <NuxtLink to="/sign-up">
-          <Button
-            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
-            Créer un compte
-          </Button>
-        </NuxtLink>
-      </div>
-    </header>
-
-    <main class="flex-1 pb-12 pt-10">
-      <div class="grid items-center gap-10 lg:grid-cols-2">
+    <main class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-12 pt-10">
+      <div class="grid flex-1 items-center gap-10 lg:grid-cols-2">
         <div class="space-y-6">
           <h1 class="text-4xl font-bold tracking-tight md:text-5xl">
             Gérez votre bar comme une entreprise.

@@ -10,10 +10,11 @@ definePageMeta({
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import AppNavbar from "@/components/AppNavbar.vue";
 import type { Company } from "~/composables/useCompanies";
-import { Building2, LogOut, User } from "lucide-vue-next";
+import { Building2, User } from "lucide-vue-next";
 
-const { session, sessionPending, refreshSession, signOut } = useAuth();
+const { session, sessionPending, refreshSession } = useAuth();
 const { listMyCompanies } = useCompanies();
 
 const companies = ref<Company[]>([]);
@@ -59,31 +60,12 @@ onMounted(async () => {
 
 <template>
   <div class="bg-background text-foreground">
-    <header class="border-b border-border bg-background/70 backdrop-blur">
-      <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-6 py-5">
-        <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
-          <div
-            class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
-            SB
-          </div>
-          <div>
-            <div class="text-sm font-semibold tracking-tight">Profil</div>
-            <div class="text-xs text-muted-foreground">
-              Ton compte + accès rapide à tes entreprises.
-            </div>
-          </div>
-        </NuxtLink>
-
-        <div class="flex items-center gap-2">
-          <NuxtLink to="/companies">
-            <Button variant="ghost">Entreprises</Button>
-          </NuxtLink>
-          <Button variant="ghost" @click="signOut">
-            Déconnexion
-          </Button>
-        </div>
-      </div>
-    </header>
+    <AppNavbar
+      title="Profil"
+      subtitle="Ton compte + accès rapide à tes entreprises."
+      mode="authed"
+      :show-profile-link="false"
+    />
 
     <main class="mx-auto w-full max-w-6xl space-y-6 px-6 py-10">
       <div class="flex items-center justify-end">

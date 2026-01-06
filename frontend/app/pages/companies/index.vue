@@ -15,6 +15,7 @@ import {
 import { useAuth } from "~/composables/useAuth";
 import { useCompanies } from "~/composables/useCompanies";
 import type { Company, CompanyType } from "~/composables/useCompanies";
+import AppNavbar from "@/components/AppNavbar.vue";
 
 const { signOut } = useAuth();
 const { listMyCompanies } = useCompanies();
@@ -52,34 +53,12 @@ onMounted(refresh);
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <header class="border-b border-border bg-background/70 backdrop-blur">
-      <div
-        class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-6 py-5">
-        <div class="flex items-center gap-3">
-          <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
-            <div
-              class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
-              SB
-            </div>
-            <div>
-              <div class="text-sm font-semibold tracking-tight">
-                Mes entreprises
-              </div>
-              <div class="text-xs text-muted-foreground">
-                Choisis une entreprise pour accéder au dashboard.
-              </div>
-            </div>
-          </NuxtLink>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <NuxtLink to="/me">
-            <Button variant="ghost">Profil</Button>
-          </NuxtLink>
-          <Button variant="ghost" @click="signOut"> Déconnexion </Button>
-        </div>
-      </div>
-    </header>
+    <AppNavbar
+      title="Mes entreprises"
+      subtitle="Choisis une entreprise pour accéder au dashboard."
+      mode="authed"
+      :show-companies-link="false"
+    />
 
     <main class="mx-auto w-full max-w-6xl px-6 py-10 space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-3">

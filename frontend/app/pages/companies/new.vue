@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
-import { useAuth } from "~/composables/useAuth";
 import { useCompanies } from "~/composables/useCompanies";
 import type { CompanyType } from "~/composables/useCompanies";
+import AppNavbar from "@/components/AppNavbar.vue";
 import { z } from "zod";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/form";
 
 const router = useRouter();
-const { signOut } = useAuth();
 const { createCompany } = useCompanies();
 
 const typeOptions: Array<{ value: CompanyType; label: string }> = [
@@ -96,34 +95,11 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <header class="border-b border-border bg-background/70 backdrop-blur">
-      <div
-        class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-6 py-5">
-        <NuxtLink
-          to="/companies"
-          class="flex items-center gap-3 hover:opacity-95">
-          <div
-            class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
-            SB
-          </div>
-          <div>
-            <div class="text-sm font-semibold tracking-tight">
-              Créer une entreprise
-            </div>
-            <div class="text-xs text-slate-400">
-              Étape 1 — configuration de base
-            </div>
-          </div>
-        </NuxtLink>
-
-        <div class="flex items-center gap-2">
-          <NuxtLink to="/me">
-            <Button variant="ghost">Profil</Button>
-          </NuxtLink>
-          <Button variant="ghost" @click="signOut"> Déconnexion </Button>
-        </div>
-      </div>
-    </header>
+    <AppNavbar
+      title="Créer une entreprise"
+      subtitle="Étape 1 — configuration de base"
+      mode="authed"
+    />
 
     <main class="mx-auto w-full max-w-7xl px-6 py-10">
       <Card class="mx-auto w-full max-w-xl border-border bg-card/60">
