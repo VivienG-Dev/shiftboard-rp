@@ -1,19 +1,199 @@
 <script setup lang="ts">
 import { useAuth } from "~/composables/useAuth";
+import { useCompanies } from "~/composables/useCompanies";
 
 definePageMeta({
   middleware: "auth",
   ssr: false,
 });
 
-const { session } = useAuth();
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Company } from "~/composables/useCompanies";
+import { Building2, LogOut, User } from "lucide-vue-next";
+
+const { session, sessionPending, refreshSession, signOut } = useAuth();
+const { listMyCompanies } = useCompanies();
+
+const companies = ref<Company[]>([]);
+const companiesLoading = ref(true);
+const companiesError = ref<string | null>(null);
+
+const user = computed(() => (session.value as any)?.user ?? null);
+const userName = computed(() => String(user.value?.name ?? user.value?.displayName ?? "Utilisateur"));
+const userEmail = computed(() => String(user.value?.email ?? ""));
+
+const initials = computed(() => {
+  const parts = userName.value.trim().split(/\s+/).filter(Boolean);
+  const letters = parts.slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
+  return letters || "SB";
+});
+
+async function loadCompanies() {
+  companiesLoading.value = true;
+  companiesError.value = null;
+  try {
+    const res = await listMyCompanies();
+    companies.value = res.data ?? [];
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible de charger tes entreprises.";
+    companiesError.value = message;
+  } finally {
+    companiesLoading.value = false;
+  }
+}
+
+async function refreshAll() {
+  await Promise.all([refreshSession(), loadCompanies()]);
+}
+
+onMounted(async () => {
+  if (!session.value) await refreshSession();
+  await loadCompanies();
+});
 </script>
 
 <template>
-  <div class="p-6 space-y-3">
-    <h1 class="text-2xl font-semibold">Me</h1>
-    <pre class="text-xs bg-muted p-3 rounded-md overflow-auto">{{
-      session
-    }}</pre>
+  <div class="bg-background text-foreground">
+    <header class="border-b border-border bg-background/70 backdrop-blur">
+      <div class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-6 py-5">
+        <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
+          <div
+            class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950">
+            SB
+          </div>
+          <div>
+            <div class="text-sm font-semibold tracking-tight">Profil</div>
+            <div class="text-xs text-muted-foreground">
+              Ton compte + accès rapide à tes entreprises.
+            </div>
+          </div>
+        </NuxtLink>
+
+        <div class="flex items-center gap-2">
+          <NuxtLink to="/companies">
+            <Button variant="ghost">Entreprises</Button>
+          </NuxtLink>
+          <Button variant="ghost" @click="signOut">
+            Déconnexion
+          </Button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl space-y-6 px-6 py-10">
+      <div class="flex items-center justify-end">
+        <Button variant="outline" :disabled="sessionPending" @click="refreshAll">
+          Actualiser
+        </Button>
+      </div>
+
+      <div class="grid gap-4 lg:grid-cols-3">
+        <Card class="border-border bg-card/60 lg:col-span-1">
+          <CardHeader class="space-y-1">
+            <CardTitle class="flex items-center gap-2 text-lg">
+              <User class="h-4 w-4" />
+              Compte
+            </CardTitle>
+            <CardDescription>Infos de ta session.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div class="flex items-center gap-4">
+              <div
+                class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-linear-to-tr from-cyan-400 to-pink-500 text-sm font-black text-slate-950"
+              >
+                {{ initials }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="truncate font-semibold">{{ userName }}</div>
+                <div class="truncate text-sm text-muted-foreground">
+                  {{ userEmail || "—" }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between gap-2 text-sm">
+              <span class="text-muted-foreground">Statut</span>
+              <span class="text-xs">
+                {{ sessionPending ? "Chargement…" : "Connecté" }}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card class="border-border bg-card/60 lg:col-span-2">
+          <CardHeader class="space-y-1">
+            <CardTitle class="flex items-center gap-2 text-lg">
+              <Building2 class="h-4 w-4" />
+              Mes entreprises
+            </CardTitle>
+            <CardDescription>
+              Accède directement au dashboard d’une entreprise.
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="space-y-3">
+            <div
+              v-if="companiesError"
+              class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200"
+            >
+              {{ companiesError }}
+            </div>
+
+            <div v-if="companiesLoading" class="grid gap-3 md:grid-cols-2">
+              <Skeleton class="h-20 w-full" />
+              <Skeleton class="h-20 w-full" />
+              <Skeleton class="h-20 w-full" />
+              <Skeleton class="h-20 w-full" />
+            </div>
+
+            <div
+              v-else-if="companies.length === 0"
+              class="rounded-xl border border-border bg-background/40 p-6 text-sm text-muted-foreground"
+            >
+              Aucune entreprise pour le moment. Crée-en une depuis la page Entreprises.
+              <div class="mt-4">
+                <NuxtLink to="/companies">
+                  <Button
+                    class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400"
+                  >
+                    Voir les entreprises
+                  </Button>
+                </NuxtLink>
+              </div>
+            </div>
+
+            <div v-else class="grid gap-3 md:grid-cols-2">
+              <NuxtLink
+                v-for="c in companies"
+                :key="c.id"
+                :to="`/companies/${c.id}/dashboard`"
+                class="rounded-xl border border-border bg-background/40 p-4 hover:bg-accent/30"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="truncate font-semibold">{{ c.name }}</div>
+                    <div class="mt-1 text-xs text-muted-foreground">
+                      {{ c.type }}
+                      <span v-if="c.slug">• {{ c.slug }}</span>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline">Ouvrir</Button>
+                </div>
+              </NuxtLink>
+            </div>
+
+            <div class="pt-2">
+              <NuxtLink to="/companies">
+                <Button variant="outline" class="w-full">Gérer mes entreprises</Button>
+              </NuxtLink>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
   </div>
 </template>
