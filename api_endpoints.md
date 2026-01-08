@@ -86,36 +86,10 @@ Meta:
 
 Note: this repo currently uses **Better Auth** mounted at `backend/lib/auth.ts` with `basePath: /api/auth`.
 So the working auth routes are Better Auth routes like:
-- `POST /api/auth/sign-in/email`
-- `GET /api/auth/get-session`
-- `POST /api/auth/sign-out`
 
-### POST `/auth/register`
+### POST `/api/auth/sign-in/email`
 
-Create a user account.
-
-**Body**
-
-```json
-{
-  "email": "user@example.com",
-  "password": "string",
-  "displayName": "string"
-}
-```
-
-**Response**
-
-```json
-{
-  "data": {
-    "user": { "id": "uuid", "email": "...", "displayName": "..." },
-    "token": "jwt"
-  }
-}
-```
-
-### POST `/auth/login`
+Sign in with email + password (cookie-based session).
 
 **Body**
 
@@ -123,22 +97,25 @@ Create a user account.
 { "email": "user@example.com", "password": "string" }
 ```
 
-**Response** same as register.
+### POST `/api/auth/sign-up/email`
 
-### GET `/auth/me`
+Create a user account.
 
-Return current user + their companies.
-
-**Response**
+**Body**
 
 ```json
-{
-  "data": {
-    "user": { "id": "uuid", "email": "...", "displayName": "..." },
-    "companies": [{ "companyId": "uuid", "name": "...", "role": "OWNER" }]
-  }
-}
+{ "name": "Display name", "email": "user@example.com", "password": "string" }
 ```
+
+### GET `/api/auth/get-session`
+
+Get current session (user + session metadata).
+
+### POST `/api/auth/sign-out`
+
+Sign out and clear session cookies.
+
+> Legacy endpoints in this doc (`/auth/register`, `/auth/login`, `/auth/me`) are not used in this repo right now.
 
 ---
 
