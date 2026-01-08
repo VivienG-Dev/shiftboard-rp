@@ -9,6 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,41 +29,80 @@ import {
 } from "@/components/ui/table";
 import { useCompanyTeam } from "~/composables/useCompanyTeam";
 import type { MemberRow, MyMembership } from "~/composables/useCompanyTeam";
-import { Users } from "lucide-vue-next";
+import { Users, X, UserMinus } from "lucide-vue-next";
 
 const route = useRoute();
 const companyId = computed(() => String(route.params.companyId));
 
-const { getMyMembership, updateMyMembership, listMembers } = useCompanyTeam();
+const {
+  getMyMembership,
+  updateMyMembership,
+  listMembers,
+  listRoles,
+  updateMember,
+  addMemberRole,
+  removeMemberRole,
+  archiveMember,
+} = useCompanyTeam();
 
 const me = ref<MyMembership | null>(null);
 const members = ref<MemberRow[]>([]);
+const roles = ref<Array<{ id: string; name: string; archivedAt: string | null }>>([]);
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
 const isUpdatingRole = ref(false);
 const selectedActiveRoleId = ref<string>("");
+const rolesError = ref<string | null>(null);
+const isUpdatingMembers = ref<Record<string, boolean>>({});
+const roleSelectionByMember = ref<Record<string, string>>({});
+const activeRoleByMember = ref<Record<string, string>>({});
+const archiveDialogOpen = ref(false);
+const memberToArchive = ref<MemberRow | null>(null);
 
 async function refresh() {
   isLoading.value = true;
   errorMessage.value = null;
-  try {
-    const [meRes, membersRes] = await Promise.all([
-      getMyMembership(companyId.value),
-      listMembers(companyId.value),
-    ]);
-    me.value = meRes.data;
-    members.value = membersRes.data ?? [];
+  const [meRes, membersRes, rolesRes] = await Promise.allSettled([
+    getMyMembership(companyId.value),
+    listMembers(companyId.value),
+    listRoles(companyId.value),
+  ]);
+
+  if (meRes.status === "fulfilled") {
+    me.value = meRes.value.data;
     selectedActiveRoleId.value = me.value?.membership.activeRoleId ?? "";
-  } catch (error: unknown) {
-    const message =
-      (error as any)?.data?.message ||
-      (error as any)?.message ||
-      "Impossible de charger l'équipe.";
-    errorMessage.value = message;
-  } finally {
-    isLoading.value = false;
+  } else {
+    errorMessage.value =
+      (meRes.reason as any)?.data?.message ||
+      (meRes.reason as any)?.message ||
+      "Impossible de charger ton rôle actif.";
   }
+
+  if (membersRes.status === "fulfilled") {
+    members.value = membersRes.value.data ?? [];
+    activeRoleByMember.value = members.value.reduce<Record<string, string>>((acc, m) => {
+      acc[m.membership.id] = m.membership.activeRoleId ?? "";
+      return acc;
+    }, {});
+  } else {
+    errorMessage.value =
+      (membersRes.reason as any)?.data?.message ||
+      (membersRes.reason as any)?.message ||
+      "Impossible de charger l'équipe.";
+  }
+
+  if (rolesRes.status === "fulfilled") {
+    roles.value = (rolesRes.value.data ?? []).filter((r) => !r.archivedAt);
+    rolesError.value = null;
+  } else {
+    rolesError.value =
+      (rolesRes.reason as any)?.data?.message ||
+      (rolesRes.reason as any)?.message ||
+      "Impossible de charger les rôles.";
+  }
+
+  isLoading.value = false;
 }
 
 async function onUpdateMyActiveRole() {
@@ -76,6 +125,86 @@ async function onUpdateMyActiveRole() {
   }
 }
 
+function availableRoles(member: MemberRow) {
+  const currentRoleIds = new Set(member.roles.map((r) => r.id));
+  return roles.value.filter((r) => !currentRoleIds.has(r.id));
+}
+
+async function onAddRole(member: MemberRow) {
+  const roleId = roleSelectionByMember.value[member.membership.id];
+  if (!roleId) return;
+  isUpdatingMembers.value[member.membership.id] = true;
+  try {
+    await addMemberRole(companyId.value, member.membership.id, roleId);
+    roleSelectionByMember.value[member.membership.id] = "";
+    await refresh();
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible d'ajouter le rôle.";
+    errorMessage.value = message;
+  } finally {
+    isUpdatingMembers.value[member.membership.id] = false;
+  }
+}
+
+async function onRemoveRole(member: MemberRow, roleId: string) {
+  isUpdatingMembers.value[member.membership.id] = true;
+  try {
+    await removeMemberRole(companyId.value, member.membership.id, roleId);
+    await refresh();
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible de retirer le rôle.";
+    errorMessage.value = message;
+  } finally {
+    isUpdatingMembers.value[member.membership.id] = false;
+  }
+}
+
+async function onUpdateMemberActiveRole(member: MemberRow) {
+  const roleId = activeRoleByMember.value[member.membership.id];
+  if (!roleId) return;
+  isUpdatingMembers.value[member.membership.id] = true;
+  try {
+    await updateMember(companyId.value, member.membership.id, roleId);
+    successMessage.value = "Rôle actif mis à jour.";
+    await refresh();
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible de mettre à jour le rôle actif.";
+    errorMessage.value = message;
+  } finally {
+    isUpdatingMembers.value[member.membership.id] = false;
+  }
+}
+
+async function onArchiveMember() {
+  if (!memberToArchive.value) return;
+  isUpdatingMembers.value[memberToArchive.value.membership.id] = true;
+  try {
+    await archiveMember(companyId.value, memberToArchive.value.membership.id);
+    memberToArchive.value = null;
+    archiveDialogOpen.value = false;
+    await refresh();
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible d'archiver le membre.";
+    errorMessage.value = message;
+  } finally {
+    if (memberToArchive.value) {
+      isUpdatingMembers.value[memberToArchive.value.membership.id] = false;
+    }
+  }
+}
+
 onMounted(refresh);
 </script>
 
@@ -94,6 +223,9 @@ onMounted(refresh);
 
       <NuxtLink :to="`/companies/${companyId}/team/invites`">
         <Button variant="outline">Invitations</Button>
+      </NuxtLink>
+      <NuxtLink :to="`/companies/${companyId}/team/roles`">
+        <Button variant="outline">Rôles</Button>
       </NuxtLink>
     </div>
 
@@ -130,6 +262,9 @@ onMounted(refresh);
         <CardDescription>Liste des membres (permissions requises pour certaines actions).</CardDescription>
       </CardHeader>
       <CardContent>
+        <div v-if="rolesError" class="mb-3 text-sm text-muted-foreground">
+          Rôles indisponibles (permissions requises).
+        </div>
         <div class="rounded-xl border border-border bg-background/40">
           <Table>
             <TableHeader>
@@ -137,16 +272,17 @@ onMounted(refresh);
                 <TableHead>Nom</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Rôles</TableHead>
-                <TableHead class="text-right">Rôle actif</TableHead>
+                <TableHead>Rôle actif</TableHead>
+                <TableHead class="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && members.length === 0" :colspan="4">
+              <TableEmpty v-if="!isLoading && members.length === 0" :colspan="5">
                 Aucun membre
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="4" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="5" class="text-muted-foreground">Chargement…</TableCell>
               </TableRow>
 
               <TableRow v-for="m in members" :key="m.membership.id">
@@ -157,14 +293,72 @@ onMounted(refresh);
                     <span
                       v-for="r in m.roles"
                       :key="r.id"
-                      class="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                      class="flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
                     >
                       {{ r.name }}
+                      <button
+                        v-if="!rolesError"
+                        type="button"
+                        class="text-muted-foreground hover:text-foreground"
+                        @click="onRemoveRole(m, r.id)"
+                      >
+                        <X class="h-3 w-3" />
+                      </button>
                     </span>
                   </div>
+                  <div v-if="!rolesError" class="mt-2 flex items-center gap-2">
+                    <NativeSelect
+                      v-model="roleSelectionByMember[m.membership.id]"
+                      class="max-w-[180px]"
+                    >
+                      <option value="">Ajouter un rôle</option>
+                      <option
+                        v-for="r in availableRoles(m)"
+                        :key="r.id"
+                        :value="r.id"
+                      >
+                        {{ r.name }}
+                      </option>
+                    </NativeSelect>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      :disabled="!roleSelectionByMember[m.membership.id]"
+                      @click="onAddRole(m)"
+                    >
+                      Ajouter
+                    </Button>
+                  </div>
                 </TableCell>
-                <TableCell class="text-right text-muted-foreground">
-                  {{ m.membership.activeRoleId ?? "—" }}
+                <TableCell class="text-muted-foreground">
+                  <div v-if="rolesError || roles.length === 0">
+                    {{ m.membership.activeRoleId ?? "—" }}
+                  </div>
+                  <div v-else class="flex items-center gap-2">
+                    <NativeSelect v-model="activeRoleByMember[m.membership.id]" class="max-w-[180px]">
+                      <option value="" disabled>Choisir un rôle</option>
+                      <option v-for="r in roles" :key="r.id" :value="r.id">
+                        {{ r.name }}
+                      </option>
+                    </NativeSelect>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      :disabled="!activeRoleByMember[m.membership.id]"
+                      @click="onUpdateMemberActiveRole(m)"
+                    >
+                      Mettre à jour
+                    </Button>
+                  </div>
+                </TableCell>
+                <TableCell class="text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    @click="memberToArchive = m; archiveDialogOpen = true"
+                  >
+                    <UserMinus class="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -173,5 +367,27 @@ onMounted(refresh);
       </CardContent>
     </Card>
   </div>
-</template>
 
+  <AlertDialog :open="archiveDialogOpen" @update:open="archiveDialogOpen = $event">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Archiver ce membre ?</AlertDialogTitle>
+        <AlertDialogDescription>
+          Le membre perdra l’accès à l’entreprise.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel :disabled="isUpdatingMembers[memberToArchive?.membership.id || '']">
+          Annuler
+        </AlertDialogCancel>
+        <AlertDialogAction
+          class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          :disabled="isUpdatingMembers[memberToArchive?.membership.id || '']"
+          @click="onArchiveMember"
+        >
+          Archiver
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+</template>

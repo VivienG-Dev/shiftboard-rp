@@ -55,6 +55,17 @@ type CreateInviteInput = {
   expiresInHours?: number;
 };
 
+type CreateRoleInput = {
+  name: string;
+  key?: string;
+  permissions?: string[];
+};
+
+type UpdateRoleInput = {
+  name?: string;
+  permissions?: string[];
+};
+
 export function useCompanyTeam() {
   const runtimeConfig = useRuntimeConfig();
   const backendUrl = normalizeBackendUrl(
@@ -90,6 +101,53 @@ export function useCompanyTeam() {
     return apiFetch<ListResponse<CompanyRole>>(`/companies/${companyId}/roles`);
   }
 
+  async function createRole(companyId: string, input: CreateRoleInput) {
+    return apiFetch<DataResponse<CompanyRole>>(`/companies/${companyId}/roles`, {
+      method: "POST",
+      body: input,
+    });
+  }
+
+  async function updateRole(companyId: string, roleId: string, input: UpdateRoleInput) {
+    return apiFetch<DataResponse<CompanyRole>>(`/companies/${companyId}/roles/${roleId}`, {
+      method: "PATCH",
+      body: input,
+    });
+  }
+
+  async function archiveRole(companyId: string, roleId: string) {
+    return apiFetch<DataResponse<CompanyRole>>(`/companies/${companyId}/roles/${roleId}/archive`, {
+      method: "POST",
+    });
+  }
+
+  async function updateMember(companyId: string, memberId: string, activeRoleId: string) {
+    return apiFetch<DataResponse<MemberRow>>(`/companies/${companyId}/members/${memberId}`, {
+      method: "PATCH",
+      body: { activeRoleId },
+    });
+  }
+
+  async function addMemberRole(companyId: string, memberId: string, roleId: string) {
+    return apiFetch<DataResponse<MemberRow>>(`/companies/${companyId}/members/${memberId}/roles`, {
+      method: "POST",
+      body: { roleId },
+    });
+  }
+
+  async function removeMemberRole(companyId: string, memberId: string, roleId: string) {
+    return apiFetch<DataResponse<MemberRow>>(
+      `/companies/${companyId}/members/${memberId}/roles/${roleId}`,
+      { method: "DELETE" }
+    );
+  }
+
+  async function archiveMember(companyId: string, memberId: string) {
+    return apiFetch<DataResponse<MemberRow>>(`/companies/${companyId}/members/${memberId}/archive`, {
+      method: "POST",
+    });
+  }
+
   async function listInvites(companyId: string) {
     return apiFetch<ListResponse<Invite>>(`/companies/${companyId}/invites`);
   }
@@ -113,6 +171,13 @@ export function useCompanyTeam() {
     updateMyMembership,
     listMembers,
     listRoles,
+    createRole,
+    updateRole,
+    archiveRole,
+    updateMember,
+    addMemberRole,
+    removeMemberRole,
+    archiveMember,
     listInvites,
     createInvite,
     acceptInvite,
@@ -126,4 +191,3 @@ function normalizeBackendUrl(value?: string) {
   if (!trimmed) return fallback;
   return trimmed.replace(/\/$/, "");
 }
-

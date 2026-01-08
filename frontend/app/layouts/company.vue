@@ -15,6 +15,7 @@ import {
   FileText,
   Users,
   Truck,
+  Shield,
 } from "lucide-vue-next";
 import {
   Sidebar,
@@ -228,6 +229,18 @@ const toggleTheme = () => {
                   <NuxtLink :to="`/companies/${companyId}/team`">
                     <Users />
                     <span>Équipe</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  as-child
+                  :is-active="isActive(`/companies/${companyId}/team/roles`)"
+                  tooltip="Rôles">
+                  <NuxtLink :to="`/companies/${companyId}/team/roles`">
+                    <Shield />
+                    <span>Rôles</span>
                   </NuxtLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

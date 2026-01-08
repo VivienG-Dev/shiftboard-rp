@@ -132,6 +132,9 @@ onMounted(refresh);
       <NuxtLink :to="`/companies/${companyId}/team/members`">
         <Button variant="outline">Membres</Button>
       </NuxtLink>
+      <NuxtLink :to="`/companies/${companyId}/team/roles`">
+        <Button variant="outline">Rôles</Button>
+      </NuxtLink>
     </div>
 
     <div
