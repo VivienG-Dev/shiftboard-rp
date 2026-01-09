@@ -52,7 +52,10 @@ onMounted(refresh);
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground">
+  <div class="relative min-h-screen bg-background text-foreground">
+    <div
+      class="pointer-events-none absolute inset-0 [background:radial-gradient(900px_circle_at_10%_15%,rgba(34,211,238,0.12),transparent_55%),radial-gradient(900px_circle_at_90%_80%,rgba(236,72,153,0.12),transparent_55%)]"
+    />
     <AppNavbar
       title="Mes entreprises"
       subtitle="Choisis une entreprise pour accéder au dashboard."
@@ -60,7 +63,7 @@ onMounted(refresh);
       :show-companies-link="false"
     />
 
-    <main class="mx-auto w-full max-w-6xl px-6 py-10 space-y-6">
+    <main class="relative mx-auto w-full max-w-6xl px-6 py-10 space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-3xl font-bold tracking-tight">Entreprises</h1>
