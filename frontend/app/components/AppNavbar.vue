@@ -28,10 +28,11 @@ const showAuthedActions = computed(
 </script>
 
 <template>
-  <header class="border-b border-border bg-background/70 backdrop-blur">
-    <div
-      class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-6 py-5"
-    >
+  <header class="bg-transparent pb-6 pt-6">
+    <div class="mx-auto w-full max-w-6xl px-6">
+      <div
+        class="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background/80 px-5 py-3 shadow-[0_24px_60px_-45px_rgba(15,23,42,0.9)] backdrop-blur"
+      >
       <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-95">
         <div
           class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-tr from-cyan-400 to-pink-500 text-xs font-black text-slate-950"
@@ -71,7 +72,7 @@ const showAuthedActions = computed(
           </template>
         </slot>
       </div>
+      </div>
     </div>
   </header>
 </template>
-
