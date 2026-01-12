@@ -21,7 +21,7 @@ export class SalesCardsService {
       include: {
         company: true,
         membershipRoles: {
-          include: { role: { select: { id: true, permissions: true, archivedAt: true } } },
+          include: { role: { select: { id: true, name: true, permissions: true, archivedAt: true } } },
         },
       },
     });
@@ -46,17 +46,6 @@ export class SalesCardsService {
       if (!mr.role.archivedAt) {
         for (const p of mr.role.permissions ?? []) permissions.add(p);
       }
-    }
-
-    if (
-      membership.activeRoleId &&
-      !membership.membershipRoles.some((mr) => mr.role.id === membership.activeRoleId)
-    ) {
-      const activeRole = await this.prisma.companyRole.findFirst({
-        where: { id: membership.activeRoleId, companyId, archivedAt: null },
-        select: { permissions: true },
-      });
-      for (const p of activeRole?.permissions ?? []) permissions.add(p);
     }
 
     return permissions.has(permission);
@@ -109,15 +98,20 @@ export class SalesCardsService {
       throw new BadRequestException('You already have an active shift card');
     }
 
-    const roleId = input.roleId?.trim() || membership.activeRoleId || undefined;
+    const activeRoles = membership.membershipRoles
+      .filter((r) => !r.role.archivedAt)
+      .map((r) => r.role)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const requestedRoleId = input.roleId?.trim();
+    const roleId =
+      requestedRoleId ||
+      activeRoles.find((r) => (r.permissions ?? []).includes('salesCards.create'))?.id ||
+      activeRoles[0]?.id;
     if (!roleId) {
-      throw new BadRequestException('roleId is required (or set an active role)');
+      throw new BadRequestException('No role available for this member');
     }
 
-    const allowedRoleIds = new Set(membership.membershipRoles.map((r) => r.role.id));
-    if (membership.activeRoleId) {
-      allowedRoleIds.add(membership.activeRoleId);
-    }
+    const allowedRoleIds = new Set(activeRoles.map((r) => r.id));
     if (!allowedRoleIds.has(roleId)) {
       throw new ForbiddenException('You do not have access to this role');
     }
