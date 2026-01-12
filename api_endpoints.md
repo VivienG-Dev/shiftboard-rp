@@ -275,12 +275,6 @@ List members and roles.
 
 **Auth**: membership required + `members.read` (or `OWNER`)
 
-### PATCH `/companies/:companyId/members/:memberId`
-
-Deprecated (active role is no longer used). Keep for backward compatibility only.
-
-**Auth**: `members.updateRole` (or `OWNER`)
-
 ### POST `/companies/:companyId/members/:memberId/roles`
 
 Assign an additional role to a member.
@@ -355,12 +349,6 @@ Accept an invite and create membership.
 ### GET `/companies/:companyId/me`
 
 Return the caller’s membership + assigned roles for a company.
-
-**Auth**: any company member
-
-### PATCH `/companies/:companyId/me`
-
-Deprecated (active role is no longer used). Keep for backward compatibility only.
 
 **Auth**: any company member
 
