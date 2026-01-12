@@ -221,12 +221,14 @@ onMounted(refresh);
         </p>
       </div>
 
-      <NuxtLink :to="`/companies/${companyId}/team/invites`">
-        <Button variant="outline">Invitations</Button>
-      </NuxtLink>
-      <NuxtLink :to="`/companies/${companyId}/team/roles`">
-        <Button variant="outline">Rôles</Button>
-      </NuxtLink>
+      <div class="flex flex-wrap items-center gap-2">
+        <NuxtLink :to="`/companies/${companyId}/team/invites`">
+          <Button variant="outline">Invitations</Button>
+        </NuxtLink>
+        <NuxtLink :to="`/companies/${companyId}/team/roles`">
+          <Button variant="outline">Rôles</Button>
+        </NuxtLink>
+      </div>
     </div>
 
     <div v-if="errorMessage" class="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
@@ -293,50 +295,59 @@ onMounted(refresh);
                 <TableCell class="font-medium">{{ m.user.name }}</TableCell>
                 <TableCell class="text-muted-foreground">{{ m.user.email }}</TableCell>
                 <TableCell>
-                  <div class="flex flex-wrap gap-1">
-                    <span
-                      v-for="r in m.roles"
-                      :key="r.id"
-                      class="flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                    >
-                      {{ r.name }}
-                      <button
-                        v-if="!rolesError"
-                        type="button"
-                        class="text-muted-foreground hover:text-foreground"
-                        @click="onRemoveRole(m, r.id)"
-                      >
-                        <X class="h-3 w-3" />
-                      </button>
-                    </span>
-                  </div>
-                  <div v-if="!rolesError" class="mt-2 flex items-center gap-2">
-                    <NativeSelect
-                      class="max-w-[180px]"
-                      :value="roleSelectionByMember[m.membership.id]"
-                      @change="
-                        roleSelectionByMember[m.membership.id] = (
-                          $event.target as HTMLSelectElement
-                        ).value
-                      "
-                    >
-                      <option value="">Ajouter un rôle</option>
-                      <option
-                        v-for="r in availableRoles(m)"
+                  <div class="space-y-2">
+                    <div class="flex flex-wrap gap-2">
+                      <span
+                        v-for="r in m.roles"
                         :key="r.id"
-                        :value="r.id"
+                        class="group inline-flex items-center gap-1 rounded-full border border-border bg-muted/70 px-2 py-1 text-xs text-foreground"
                       >
                         {{ r.name }}
-                      </option>
-                    </NativeSelect>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      :disabled="!roleSelectionByMember[m.membership.id]"
-                      @click="onAddRole(m)"
-                    >
-                      Ajouter
-                    </Button>
+                        <button
+                          v-if="!rolesError"
+                          type="button"
+                          class="text-muted-foreground opacity-70 transition hover:text-foreground group-hover:opacity-100"
+                          @click="onRemoveRole(m, r.id)"
+                        >
+                          <X class="h-3 w-3" />
+                        </button>
+                      </span>
+                      <span
+                        v-if="m.roles.length === 0"
+                        class="rounded-full border border-dashed border-border px-2 py-1 text-xs text-muted-foreground"
+                      >
+                        Aucun rôle
+                      </span>
+                    </div>
+                    <div v-if="!rolesError" class="flex items-center gap-2">
+                      <NativeSelect
+                        class="w-full max-w-[200px]"
+                        :value="roleSelectionByMember[m.membership.id]"
+                        @change="
+                          roleSelectionByMember[m.membership.id] = (
+                            $event.target as HTMLSelectElement
+                          ).value
+                        "
+                      >
+                        <option value="">Ajouter un rôle…</option>
+                        <option
+                          v-for="r in availableRoles(m)"
+                          :key="r.id"
+                          :value="r.id"
+                        >
+                          {{ r.name }}
+                        </option>
+                      </NativeSelect>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        class="shrink-0"
+                        :disabled="!roleSelectionByMember[m.membership.id]"
+                        @click="onAddRole(m)"
+                      >
+                        Ajouter
+                      </Button>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell class="text-muted-foreground">
