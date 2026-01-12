@@ -179,7 +179,6 @@ Defines a user’s membership within a company.
 - `id`
 - `userId`
 - `companyId`
-- `activeRoleId` (optional) → `CompanyRole.id` (default role for UI convenience)
 - `timestamps`
 
 ### CompanyRole

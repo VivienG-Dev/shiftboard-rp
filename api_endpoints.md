@@ -277,15 +277,9 @@ List members and roles.
 
 ### PATCH `/companies/:companyId/members/:memberId`
 
-Change role.
+Deprecated (active role is no longer used). Keep for backward compatibility only.
 
 **Auth**: `members.updateRole` (or `OWNER`)
-
-**Body**
-
-```json
-{ "activeRoleId": "uuid" }
-```
 
 ### POST `/companies/:companyId/members/:memberId/roles`
 
@@ -360,21 +354,15 @@ Accept an invite and create membership.
 
 ### GET `/companies/:companyId/me`
 
-Return the caller’s membership + assigned roles for a company (used to choose `activeRoleId` and show role dropdowns).
+Return the caller’s membership + assigned roles for a company.
 
 **Auth**: any company member
 
 ### PATCH `/companies/:companyId/me`
 
-Set `activeRoleId` (must be one of the roles assigned to the caller).
+Deprecated (active role is no longer used). Keep for backward compatibility only.
 
 **Auth**: any company member
-
-**Body**
-
-```json
-{ "activeRoleId": "uuid" }
-```
 
 ### POST `/companies/:companyId/members/:memberId/archive`
 
@@ -697,8 +685,8 @@ Start a shift card for current user.
 
 **Rules**
 
-- If omitted, `roleId` defaults to the membership’s `activeRoleId`.
-- `roleId` must be one of the roles assigned to the user’s membership (`MembershipRole`) (or the `activeRoleId`).
+- If omitted, `roleId` is auto-selected from the user’s assigned roles (first role with `salesCards.create` permission).
+- `roleId` must be one of the roles assigned to the user’s membership (`MembershipRole`).
 - `locationId` (if provided) must belong to the company (and not be archived).
 
 **Response**
