@@ -64,14 +64,6 @@ export class PermissionsGuard implements CanActivate {
       }
     }
 
-    if (membership.activeRoleId && !membership.membershipRoles.some((mr) => mr.role.id === membership.activeRoleId)) {
-      const activeRole = await this.prisma.companyRole.findFirst({
-        where: { id: membership.activeRoleId, companyId, archivedAt: null },
-        select: { permissions: true },
-      });
-      for (const p of activeRole?.permissions ?? []) permissions.add(p);
-    }
-
     if (requiredAll?.length) {
       const missing = requiredAll.filter((p) => !permissions.has(p));
       if (missing.length) {
