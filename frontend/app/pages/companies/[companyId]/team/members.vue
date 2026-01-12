@@ -28,63 +28,41 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCompanyTeam } from "~/composables/useCompanyTeam";
-import type { MemberRow, MyMembership } from "~/composables/useCompanyTeam";
+import type { MemberRow } from "~/composables/useCompanyTeam";
 import { Users, X, UserMinus } from "lucide-vue-next";
 
 const route = useRoute();
 const companyId = computed(() => String(route.params.companyId));
 
 const {
-  getMyMembership,
-  updateMyMembership,
   listMembers,
   listRoles,
-  updateMember,
   addMemberRole,
   removeMemberRole,
   archiveMember,
 } = useCompanyTeam();
 
-const me = ref<MyMembership | null>(null);
 const members = ref<MemberRow[]>([]);
 const roles = ref<Array<{ id: string; name: string; archivedAt: string | null }>>([]);
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
-const isUpdatingRole = ref(false);
-const selectedActiveRoleId = ref<string>("");
 const rolesError = ref<string | null>(null);
 const isUpdatingMembers = ref<Record<string, boolean>>({});
 const roleSelectionByMember = ref<Record<string, string>>({});
-const activeRoleByMember = ref<Record<string, string>>({});
 const archiveDialogOpen = ref(false);
 const memberToArchive = ref<MemberRow | null>(null);
 
 async function refresh() {
   isLoading.value = true;
   errorMessage.value = null;
-  const [meRes, membersRes, rolesRes] = await Promise.allSettled([
-    getMyMembership(companyId.value),
+  const [membersRes, rolesRes] = await Promise.allSettled([
     listMembers(companyId.value),
     listRoles(companyId.value),
   ]);
 
-  if (meRes.status === "fulfilled") {
-    me.value = meRes.value.data;
-    selectedActiveRoleId.value = me.value?.membership.activeRoleId ?? "";
-  } else {
-    errorMessage.value =
-      (meRes.reason as any)?.data?.message ||
-      (meRes.reason as any)?.message ||
-      "Impossible de charger ton rôle actif.";
-  }
-
   if (membersRes.status === "fulfilled") {
     members.value = membersRes.value.data ?? [];
-    activeRoleByMember.value = members.value.reduce<Record<string, string>>((acc, m) => {
-      acc[m.membership.id] = m.membership.activeRoleId ?? "";
-      return acc;
-    }, {});
   } else {
     errorMessage.value =
       (membersRes.reason as any)?.data?.message ||
@@ -103,26 +81,6 @@ async function refresh() {
   }
 
   isLoading.value = false;
-}
-
-async function onUpdateMyActiveRole() {
-  if (!selectedActiveRoleId.value) return;
-  successMessage.value = null;
-  errorMessage.value = null;
-  isUpdatingRole.value = true;
-  try {
-    await updateMyMembership(companyId.value, selectedActiveRoleId.value);
-    successMessage.value = "Rôle actif mis à jour.";
-    await refresh();
-  } catch (error: unknown) {
-    const message =
-      (error as any)?.data?.message ||
-      (error as any)?.message ||
-      "Impossible de mettre à jour ton rôle actif.";
-    errorMessage.value = message;
-  } finally {
-    isUpdatingRole.value = false;
-  }
 }
 
 function availableRoles(member: MemberRow) {
@@ -165,25 +123,6 @@ async function onRemoveRole(member: MemberRow, roleId: string) {
   }
 }
 
-async function onUpdateMemberActiveRole(member: MemberRow) {
-  const roleId = activeRoleByMember.value[member.membership.id];
-  if (!roleId) return;
-  isUpdatingMembers.value[member.membership.id] = true;
-  try {
-    await updateMember(companyId.value, member.membership.id, roleId);
-    successMessage.value = "Rôle actif mis à jour.";
-    await refresh();
-  } catch (error: unknown) {
-    const message =
-      (error as any)?.data?.message ||
-      (error as any)?.message ||
-      "Impossible de mettre à jour le rôle actif.";
-    errorMessage.value = message;
-  } finally {
-    isUpdatingMembers.value[member.membership.id] = false;
-  }
-}
-
 async function onArchiveMember() {
   if (!memberToArchive.value) return;
   isUpdatingMembers.value[memberToArchive.value.membership.id] = true;
@@ -217,7 +156,7 @@ onMounted(refresh);
           Équipe
         </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Membres de l'entreprise + ton rôle actif.
+          Membres de l'entreprise et gestion des rôles.
         </p>
       </div>
 
@@ -240,30 +179,6 @@ onMounted(refresh);
 
     <Card class="border-border bg-card/60">
       <CardHeader class="space-y-1">
-        <CardTitle class="text-lg">Mon rôle actif</CardTitle>
-        <CardDescription>Utilisé par défaut pour les shifts.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div v-if="isLoading" class="text-sm text-muted-foreground">Chargement…</div>
-        <div v-else-if="me" class="flex flex-wrap items-center gap-2">
-          <NativeSelect
-            class="max-w-sm"
-            :value="selectedActiveRoleId"
-            @change="selectedActiveRoleId = ($event.target as HTMLSelectElement).value"
-          >
-            <option v-for="r in me.roles" :key="r.id" :value="r.id">
-              {{ r.name }}
-            </option>
-          </NativeSelect>
-          <Button variant="outline" :disabled="isUpdatingRole" @click="onUpdateMyActiveRole">
-            {{ isUpdatingRole ? "Mise à jour..." : "Mettre à jour" }}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card class="border-border bg-card/60">
-      <CardHeader class="space-y-1">
         <CardTitle class="text-lg">Membres</CardTitle>
         <CardDescription>Liste des membres (permissions requises pour certaines actions).</CardDescription>
       </CardHeader>
@@ -278,17 +193,16 @@ onMounted(refresh);
                 <TableHead>Nom</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Rôles</TableHead>
-                <TableHead>Rôle actif</TableHead>
                 <TableHead class="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableEmpty v-if="!isLoading && members.length === 0" :colspan="5">
+              <TableEmpty v-if="!isLoading && members.length === 0" :colspan="4">
                 Aucun membre
               </TableEmpty>
 
               <TableRow v-if="isLoading">
-                <TableCell colspan="5" class="text-muted-foreground">Chargement…</TableCell>
+                <TableCell colspan="4" class="text-muted-foreground">Chargement…</TableCell>
               </TableRow>
 
               <TableRow v-for="m in members" :key="m.membership.id">
@@ -348,35 +262,6 @@ onMounted(refresh);
                         Ajouter
                       </Button>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell class="text-muted-foreground">
-                  <div v-if="rolesError || roles.length === 0">
-                    {{ m.membership.activeRoleId ?? "—" }}
-                  </div>
-                  <div v-else class="flex items-center gap-2">
-                    <NativeSelect
-                      class="max-w-[180px]"
-                      :value="activeRoleByMember[m.membership.id]"
-                      @change="
-                        activeRoleByMember[m.membership.id] = (
-                          $event.target as HTMLSelectElement
-                        ).value
-                      "
-                    >
-                      <option value="" disabled>Choisir un rôle</option>
-                      <option v-for="r in roles" :key="r.id" :value="r.id">
-                        {{ r.name }}
-                      </option>
-                    </NativeSelect>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      :disabled="!activeRoleByMember[m.membership.id]"
-                      @click="onUpdateMemberActiveRole(m)"
-                    >
-                      Mettre à jour
-                    </Button>
                   </div>
                 </TableCell>
                 <TableCell class="text-right">
