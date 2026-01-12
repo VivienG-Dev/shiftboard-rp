@@ -157,7 +157,10 @@ onMounted(refresh);
             <Input v-model="search" class="pl-9" placeholder="Rechercher…" />
           </div>
 
-          <NativeSelect v-model="category">
+          <NativeSelect
+            :value="category"
+            @change="category = ($event.target as HTMLSelectElement).value"
+          >
             <option
               v-for="opt in categoryOptions"
               :key="opt.value"

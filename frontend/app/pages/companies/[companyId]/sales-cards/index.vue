@@ -220,7 +220,10 @@ onMounted(async () => {
             <div class="mb-1 text-xs font-medium text-muted-foreground">
               Statut
             </div>
-            <NativeSelect v-model="status">
+            <NativeSelect
+              :value="status"
+              @change="status = ($event.target as HTMLSelectElement).value"
+            >
               <option value="ALL">Tous</option>
               <option value="DRAFT">DRAFT</option>
               <option value="SUBMITTED">SUBMITTED</option>
@@ -231,7 +234,11 @@ onMounted(async () => {
             <div class="mb-1 text-xs font-medium text-muted-foreground">
               Utilisateur
             </div>
-            <NativeSelect v-if="members.length > 0" v-model="userId">
+            <NativeSelect
+              v-if="members.length > 0"
+              :value="userId"
+              @change="userId = ($event.target as HTMLSelectElement).value"
+            >
               <option value="ALL">Tous</option>
               <option v-for="m in members" :key="m.user.id" :value="m.user.id">
                 {{ m.user.name || m.user.email }}

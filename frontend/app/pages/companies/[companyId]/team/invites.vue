@@ -159,7 +159,10 @@ onMounted(refresh);
       <CardContent class="space-y-4">
         <div class="grid gap-3 md:grid-cols-3">
           <Input v-model="email" type="email" placeholder="email@exemple.com" />
-          <NativeSelect v-model="roleId">
+          <NativeSelect
+            :value="roleId"
+            @change="roleId = ($event.target as HTMLSelectElement).value"
+          >
             <option v-for="r in roles" :key="r.id" :value="r.id">
               {{ r.name }}
             </option>

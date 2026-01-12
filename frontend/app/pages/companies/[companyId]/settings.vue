@@ -179,7 +179,10 @@ onMounted(refresh);
 
           <div class="space-y-2">
             <label class="text-sm font-medium">Type</label>
-            <NativeSelect v-model="type">
+            <NativeSelect
+              :value="type"
+              @change="type = ($event.target as HTMLSelectElement).value"
+            >
               <option v-for="t in companyTypes" :key="t.value" :value="t.value">
                 {{ t.label }}
               </option>

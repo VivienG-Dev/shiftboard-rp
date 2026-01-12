@@ -244,7 +244,11 @@ onMounted(refresh);
       <CardContent>
         <div v-if="isLoading" class="text-sm text-muted-foreground">Chargement…</div>
         <div v-else-if="me" class="flex flex-wrap items-center gap-2">
-          <NativeSelect v-model="selectedActiveRoleId" class="max-w-sm">
+          <NativeSelect
+            class="max-w-sm"
+            :value="selectedActiveRoleId"
+            @change="selectedActiveRoleId = ($event.target as HTMLSelectElement).value"
+          >
             <option v-for="r in me.roles" :key="r.id" :value="r.id">
               {{ r.name }}
             </option>
@@ -308,8 +312,13 @@ onMounted(refresh);
                   </div>
                   <div v-if="!rolesError" class="mt-2 flex items-center gap-2">
                     <NativeSelect
-                      v-model="roleSelectionByMember[m.membership.id]"
                       class="max-w-[180px]"
+                      :value="roleSelectionByMember[m.membership.id]"
+                      @change="
+                        roleSelectionByMember[m.membership.id] = (
+                          $event.target as HTMLSelectElement
+                        ).value
+                      "
                     >
                       <option value="">Ajouter un rôle</option>
                       <option
@@ -335,7 +344,15 @@ onMounted(refresh);
                     {{ m.membership.activeRoleId ?? "—" }}
                   </div>
                   <div v-else class="flex items-center gap-2">
-                    <NativeSelect v-model="activeRoleByMember[m.membership.id]" class="max-w-[180px]">
+                    <NativeSelect
+                      class="max-w-[180px]"
+                      :value="activeRoleByMember[m.membership.id]"
+                      @change="
+                        activeRoleByMember[m.membership.id] = (
+                          $event.target as HTMLSelectElement
+                        ).value
+                      "
+                    >
                       <option value="" disabled>Choisir un rôle</option>
                       <option v-for="r in roles" :key="r.id" :value="r.id">
                         {{ r.name }}

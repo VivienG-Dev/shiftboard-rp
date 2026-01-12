@@ -296,7 +296,10 @@ onMounted(loadAll);
         <div v-else-if="!activeCard" class="grid gap-3 md:grid-cols-3">
           <Input v-model="startNote" placeholder="Note (optionnel)" />
 
-          <NativeSelect v-model="startLocationId">
+          <NativeSelect
+            :value="startLocationId"
+            @change="startLocationId = ($event.target as HTMLSelectElement).value"
+          >
             <option value="">Aucun lieu</option>
             <option v-for="loc in locations" :key="loc.id" :value="loc.id">
               {{ loc.name }}
