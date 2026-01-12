@@ -1,8 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { AddMemberRoleDto } from './dto/add-member-role.dto';
-import { UpdateMemberDto } from './dto/update-member.dto';
 import { CompanyMembersService } from './company-members.service';
 import { RequirePermissions } from '../auth/permissions.decorator';
 
@@ -17,17 +16,6 @@ export class CompanyMembersController {
     @Param('companyId') companyId: string,
   ) {
     return { data: await this.membersService.listMembers(session.user.id, companyId) };
-  }
-
-  @Patch(':memberId')
-  @RequirePermissions('members.updateRole')
-  async updateMember(
-    @Session() session: UserSession,
-    @Param('companyId') companyId: string,
-    @Param('memberId') memberId: string,
-    @Body() body: UpdateMemberDto,
-  ) {
-    return { data: await this.membersService.updateMember(session.user.id, companyId, memberId, body) };
   }
 
   @Post(':memberId/roles')

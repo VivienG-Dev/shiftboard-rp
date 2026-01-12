@@ -41,37 +41,11 @@ export class CompanyMembersService {
         id: m.id,
         companyId: m.companyId,
         userId: m.userId,
-        activeRoleId: m.activeRoleId,
         createdAt: m.createdAt,
       },
       user: m.user,
       roles: m.membershipRoles.filter((mr) => !mr.role.archivedAt).map((mr) => mr.role),
     }));
-  }
-
-  async updateMember(ownerId: string, companyId: string, membershipId: string, input: { activeRoleId?: string }) {
-    await this.assertCompanyAccess(ownerId, companyId);
-
-    const membership = await this.prisma.membership.findFirst({
-      where: { id: membershipId, companyId, archivedAt: null },
-      include: { membershipRoles: { select: { roleId: true } } },
-    });
-    if (!membership) throw new NotFoundException('Member not found');
-
-    if (input.activeRoleId !== undefined) {
-      const roleId = input.activeRoleId.trim();
-      if (!roleId) throw new BadRequestException('activeRoleId cannot be empty');
-
-      const allowedRoleIds = new Set(membership.membershipRoles.map((r) => r.roleId));
-      if (!allowedRoleIds.has(roleId)) throw new BadRequestException('Member does not have this role');
-
-      return this.prisma.membership.update({
-        where: { id: membership.id },
-        data: { activeRoleId: roleId },
-      });
-    }
-
-    return this.prisma.membership.findUnique({ where: { id: membership.id } });
   }
 
   async addMemberRole(ownerId: string, companyId: string, membershipId: string, roleId: string) {
@@ -112,7 +86,6 @@ export class CompanyMembersService {
 
     return {
       membershipId: updated!.id,
-      activeRoleId: updated!.activeRoleId,
       roles: updated!.membershipRoles.filter((mr) => !mr.role.archivedAt).map((mr) => mr.role),
     };
   }
@@ -130,20 +103,6 @@ export class CompanyMembersService {
       where: { membershipId: membership.id, roleId },
     });
 
-    const remainingRoleIds = membership.membershipRoles
-      .map((r) => r.roleId)
-      .filter((id) => id !== roleId);
-
-    const nextActiveRoleId =
-      membership.activeRoleId === roleId ? remainingRoleIds[0] ?? null : undefined;
-
-    if (nextActiveRoleId !== undefined) {
-      await this.prisma.membership.update({
-        where: { id: membership.id },
-        data: { activeRoleId: nextActiveRoleId },
-      });
-    }
-
     const updated = await this.prisma.membership.findUnique({
       where: { id: membership.id },
       include: {
@@ -155,7 +114,6 @@ export class CompanyMembersService {
 
     return {
       membershipId: updated!.id,
-      activeRoleId: updated!.activeRoleId,
       roles: updated!.membershipRoles.filter((mr) => !mr.role.archivedAt).map((mr) => mr.role),
     };
   }
@@ -179,7 +137,7 @@ export class CompanyMembersService {
 
     return this.prisma.membership.update({
       where: { id: membership.id },
-      data: { archivedAt: new Date(), activeRoleId: null },
+      data: { archivedAt: new Date() },
     });
   }
 }

@@ -13,22 +13,10 @@ export type MemberRow = {
     id: string;
     companyId: string;
     userId: string;
-    activeRoleId: string | null;
     createdAt: string;
   };
   user: { id: string; name: string; email: string; image: string | null };
   roles: Array<Pick<CompanyRole, "id" | "name" | "key" | "isSystem" | "archivedAt">>;
-};
-
-export type MyMembership = {
-  membership: {
-    id: string;
-    companyId: string;
-    userId: string;
-    activeRoleId: string | null;
-  };
-  company: { id: string; name: string; ownerId: string; archivedAt: string | null };
-  roles: Array<Pick<CompanyRole, "id" | "name" | "key" | "permissions">>;
 };
 
 export type Invite = {
@@ -82,16 +70,6 @@ export function useCompanyTeam() {
     headers: requestHeaders,
   });
 
-  async function getMyMembership(companyId: string) {
-    return apiFetch<DataResponse<MyMembership>>(`/companies/${companyId}/me`);
-  }
-
-  async function updateMyMembership(companyId: string, activeRoleId: string) {
-    return apiFetch<DataResponse<unknown>>(`/companies/${companyId}/me`, {
-      method: "PATCH",
-      body: { activeRoleId },
-    });
-  }
 
   async function listMembers(companyId: string) {
     return apiFetch<ListResponse<MemberRow>>(`/companies/${companyId}/members`);
@@ -121,12 +99,6 @@ export function useCompanyTeam() {
     });
   }
 
-  async function updateMember(companyId: string, memberId: string, activeRoleId: string) {
-    return apiFetch<DataResponse<MemberRow>>(`/companies/${companyId}/members/${memberId}`, {
-      method: "PATCH",
-      body: { activeRoleId },
-    });
-  }
 
   async function addMemberRole(companyId: string, memberId: string, roleId: string) {
     return apiFetch<DataResponse<MemberRow>>(`/companies/${companyId}/members/${memberId}/roles`, {
@@ -167,14 +139,11 @@ export function useCompanyTeam() {
   }
 
   return {
-    getMyMembership,
-    updateMyMembership,
     listMembers,
     listRoles,
     createRole,
     updateRole,
     archiveRole,
-    updateMember,
     addMemberRole,
     removeMemberRole,
     archiveMember,

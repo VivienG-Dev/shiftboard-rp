@@ -92,7 +92,6 @@ export class CompaniesService {
           data: {
             companyId: company.id,
             userId,
-            activeRoleId: ownerRole.id,
           },
         });
 

@@ -108,7 +108,6 @@ export class InvitesService {
         data: {
           userId,
           companyId: invite.companyId,
-          activeRoleId: invite.roleId,
         },
       });
 
