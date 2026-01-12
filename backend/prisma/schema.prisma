@@ -115,7 +115,6 @@ model Membership {
   id           String   @id @default(cuid())
   userId       String
   companyId    String
-  activeRoleId String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   archivedAt   DateTime?
