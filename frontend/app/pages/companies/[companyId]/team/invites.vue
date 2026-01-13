@@ -117,7 +117,7 @@ onMounted(refresh);
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-end justify-between gap-3">
+    <div class="flex flex-wrap items-end gap-3">
       <div>
         <h1 class="flex items-center gap-2 text-3xl font-bold tracking-tight">
           <MailPlus class="h-6 w-6" />
@@ -129,12 +129,14 @@ onMounted(refresh);
         </p>
       </div>
 
-      <NuxtLink :to="`/companies/${companyId}/team/members`">
-        <Button variant="outline">Membres</Button>
-      </NuxtLink>
-      <NuxtLink :to="`/companies/${companyId}/team/roles`">
-        <Button variant="outline">Rôles</Button>
-      </NuxtLink>
+      <div class="ml-auto flex flex-wrap items-center gap-2">
+        <NuxtLink :to="`/companies/${companyId}/team/members`">
+          <Button variant="outline">Membres</Button>
+        </NuxtLink>
+        <NuxtLink :to="`/companies/${companyId}/team/roles`">
+          <Button variant="outline">Rôles</Button>
+        </NuxtLink>
+      </div>
     </div>
 
     <div
