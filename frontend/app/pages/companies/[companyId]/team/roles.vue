@@ -1,10 +1,4 @@
 <script setup lang="ts">
-definePageMeta({
-  middleware: "auth",
-  layout: "company",
-  ssr: false,
-});
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +21,12 @@ import {
 import { useCompanyTeam } from "~/composables/useCompanyTeam";
 import type { CompanyRole } from "~/composables/useCompanyTeam";
 import { Archive, Pencil, Shield, Loader2 } from "lucide-vue-next";
+
+definePageMeta({
+  middleware: "auth",
+  layout: "company",
+  ssr: false,
+});
 
 const route = useRoute();
 const companyId = computed(() => String(route.params.companyId));
@@ -67,6 +67,12 @@ const permissionOptions = [
   { key: "salesCards.lock", label: "Verrouiller les shifts" },
   { key: "stats.read", label: "Lire les stats" },
 ];
+
+const permissionLabels = new Map(permissionOptions.map((option) => [option.key, option.label]));
+
+function labelForPermission(key: string) {
+  return permissionLabels.get(key) ?? key;
+}
 
 function resetForm() {
   editingRoleId.value = null;
@@ -285,7 +291,7 @@ onMounted(refresh);
                 :key="perm"
                 class="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
               >
-                {{ perm }}
+                {{ labelForPermission(perm) }}
               </span>
               <span
                 v-if="!role.permissions || role.permissions.length === 0"
@@ -322,4 +328,3 @@ onMounted(refresh);
     </AlertDialogContent>
   </AlertDialog>
 </template>
-
