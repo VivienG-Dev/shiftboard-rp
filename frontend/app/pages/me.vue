@@ -59,7 +59,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-background text-foreground">
+  <div class="relative min-h-screen bg-background text-foreground">
+    <div
+      class="pointer-events-none absolute inset-0 [background:radial-gradient(900px_circle_at_10%_15%,rgba(34,211,238,0.12),transparent_55%),radial-gradient(900px_circle_at_90%_80%,rgba(236,72,153,0.12),transparent_55%)]"
+    />
     <AppNavbar
       title="Profil"
       subtitle="Ton compte + accès rapide à tes entreprises."
@@ -67,7 +70,7 @@ onMounted(async () => {
       :show-profile-link="false"
     />
 
-    <main class="mx-auto w-full max-w-6xl space-y-6 px-6 py-10">
+    <main class="relative mx-auto w-full max-w-6xl space-y-6 px-6 py-10">
       <div class="flex items-center justify-end">
         <Button variant="outline" :disabled="sessionPending" @click="refreshAll">
           Actualiser
