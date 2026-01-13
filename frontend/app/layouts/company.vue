@@ -67,7 +67,13 @@ watchEffect(() => {
 function isActive(path: string) {
   const current = route.path.replace(/\/$/, "");
   const target = path.replace(/\/$/, "");
-  return current === target || current.startsWith(`${target}/`);
+  if (current === target) return true;
+  const nonNested = new Set([
+    `/companies/${companyId.value}/team`,
+    `/companies/${companyId.value}/sales-cards`,
+  ]);
+  if (nonNested.has(target)) return false;
+  return current.startsWith(`${target}/`);
 }
 
 const toggleTheme = () => {
