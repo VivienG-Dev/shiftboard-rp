@@ -62,9 +62,7 @@ export class CompaniesService {
 
     const companyType: CompanyType = input.type ?? 'OTHER';
 
-    const baseSlug = input.slug?.trim()
-      ? slugify(input.slug)
-      : slugify(name);
+    const baseSlug = slugify(name);
     const slug = baseSlug || undefined;
 
     try {
@@ -225,9 +223,9 @@ export class CompaniesService {
   async updateCompany(
     userId: string,
     companyId: string,
-    input: { name?: string; slug?: string | null; type?: CompanyType },
+    input: { name?: string; type?: CompanyType },
   ) {
-    await this.getCompany(userId, companyId);
+    const existing = await this.getCompany(userId, companyId);
 
     const data: { name?: string; slug?: string | null; type?: CompanyType } = {};
 
@@ -237,15 +235,9 @@ export class CompaniesService {
       data.name = name;
     }
 
-    if (input.slug !== undefined) {
-      const raw = input.slug === null ? '' : String(input.slug ?? '');
-      const trimmed = raw.trim();
-      if (!trimmed) data.slug = null;
-      else {
-        const slug = slugify(trimmed);
-        if (!slug) throw new BadRequestException('Invalid slug');
-        data.slug = slug;
-      }
+    if (input.name !== undefined) {
+      const nextSlug = slugify(data.name ?? existing.name);
+      data.slug = nextSlug || null;
     }
 
     if (input.type !== undefined) {

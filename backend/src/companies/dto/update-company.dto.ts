@@ -8,12 +8,6 @@ export class UpdateCompanyDto {
   name?: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(64)
-  slug?: string | null;
-
-  @IsOptional()
   @IsEnum(CompanyType)
   type?: CompanyType;
 }
-

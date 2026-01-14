@@ -8,11 +8,6 @@ export class CreateCompanyDto {
   name!: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(64)
-  slug?: string;
-
-  @IsOptional()
   @IsEnum(CompanyType)
   type?: CompanyType;
 }
