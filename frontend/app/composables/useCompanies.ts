@@ -19,7 +19,6 @@ type ListCompaniesResponse = { data: Company[] };
 
 type CreateCompanyInput = {
   name: string;
-  slug?: string;
   type?: CompanyType;
 };
 
@@ -38,7 +37,7 @@ type CreateCompanyLocationInput = {
 
 type CreateCompanyLocationResponse = { data: CompanyLocation };
 
-type UpdateCompanyInput = Partial<Pick<Company, "name" | "slug" | "type">>;
+type UpdateCompanyInput = Partial<Pick<Company, "name" | "type">>;
 type UpdateCompanyResponse = { data: Company };
 
 type ArchiveCompanyResponse = { data: Company };
