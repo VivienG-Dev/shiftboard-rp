@@ -130,9 +130,12 @@ Create a company and make requester `OWNER`.
 **Body**
 
 ```json
-{ "name": "Nightclub Name", "slug": "optional-slug" }
+{ "name": "Nightclub Name" }
 ```
 
+Notes:
+
+- `slug` is generated automatically from the name.
 **Response**
 
 ```json
@@ -194,13 +197,12 @@ Update company settings.
 **Body** (partial)
 
 ```json
-{ "name": "string", "slug": "string|null", "type": "BAR|CLUB|FAST_FOOD|OTHER" }
+{ "name": "string", "type": "BAR|CLUB|FAST_FOOD|OTHER" }
 ```
 
 Notes:
 
-- `slug: null` (or empty string) removes the slug.
-- `slug` is slugified server-side.
+- Updating the name will also update the `slug` automatically.
 
 **Response**
 

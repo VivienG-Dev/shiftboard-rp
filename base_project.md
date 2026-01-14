@@ -162,6 +162,8 @@ better-auth can run in:
 - `type` (`BAR`, `CLUB`, `FAST_FOOD`, `OTHER`)
 - `timestamps`
 
+Note: `slug` is generated automatically from the company name.
+
 ### CompanyLocation (Branch / Place)
 
 Company represents the brand/org. Locations represent places/branches under that company.
