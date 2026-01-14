@@ -51,11 +51,6 @@ const schema = toTypedSchema(
     type: z.enum(["BAR", "CLUB", "FAST_FOOD", "OTHER"], {
       required_error: "Le type est requis",
     }),
-    slug: z
-      .string()
-      .max(64, "Le slug est trop long")
-      .optional()
-      .transform((v) => (v?.trim() ? v.trim() : undefined)),
   })
 );
 
@@ -64,13 +59,11 @@ const form = useForm({
   initialValues: {
     name: "",
     type: "BAR" as CompanyType,
-    slug: "",
   },
 });
 
 const generalError = ref<string | null>(null);
 const isLoading = ref(false);
-
 const onSubmit = form.handleSubmit(async (values) => {
   generalError.value = null;
   isLoading.value = true;
@@ -78,7 +71,6 @@ const onSubmit = form.handleSubmit(async (values) => {
     await createCompany({
       name: values.name,
       type: values.type,
-      slug: values.slug,
     });
     router.push("/companies");
   } catch (error: unknown) {
@@ -142,22 +134,6 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </FormControl>
                 <FormDescription>
                   Utilisé pour les futurs templates et permissions par défaut.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-
-            <FormField v-slot="{ componentField }" name="slug">
-              <FormItem>
-                <FormLabel>Slug (optionnel)</FormLabel>
-                <FormControl>
-                  <Input
-                    v-bind="componentField"
-                    placeholder="Ex: vanilla-unicorn"
-                    autocomplete="off" />
-                </FormControl>
-                <FormDescription>
-                  Laisse vide pour générer automatiquement à partir du nom.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

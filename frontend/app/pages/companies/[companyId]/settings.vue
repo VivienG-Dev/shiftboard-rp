@@ -45,7 +45,6 @@ const successMessage = ref<string | null>(null);
 const archiveDialogOpen = ref(false);
 
 const name = ref("");
-const slug = ref("");
 const type = ref<CompanyType>("OTHER");
 
 const companyTypes: Array<{ value: CompanyType; label: string }> = [
@@ -57,13 +56,7 @@ const companyTypes: Array<{ value: CompanyType; label: string }> = [
 
 function syncForm(c: Company) {
   name.value = c.name ?? "";
-  slug.value = c.slug ?? "";
   type.value = c.type ?? "OTHER";
-}
-
-function normalizeSlug(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
 }
 
 async function refresh() {
@@ -93,7 +86,6 @@ async function onSave() {
   try {
     const res = await updateCompany(companyId.value, {
       name: name.value.trim(),
-      slug: normalizeSlug(slug.value),
       type: type.value,
     });
     company.value = res.data;
@@ -141,7 +133,7 @@ onMounted(refresh);
           Paramètres
         </h1>
         <p class="mt-1 text-sm text-muted-foreground">
-          Nom, slug et type de l'entreprise.
+          Nom et type de l'entreprise.
         </p>
       </div>
 
@@ -189,13 +181,6 @@ onMounted(refresh);
             </NativeSelect>
           </div>
 
-          <div class="space-y-2 md:col-span-2">
-            <label class="text-sm font-medium">Slug (optionnel)</label>
-            <Input v-model="slug" placeholder="ex: vanilla-unicorn" />
-            <p class="text-xs text-muted-foreground">
-              Laisse vide pour supprimer le slug.
-            </p>
-          </div>
         </div>
       </CardContent>
       <CardFooter class="flex justify-end">
