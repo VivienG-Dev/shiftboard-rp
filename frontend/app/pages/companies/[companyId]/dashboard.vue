@@ -431,7 +431,7 @@ onMounted(refresh);
 
     <div class="grid gap-4 lg:grid-cols-7">
       <Card class="border-border bg-card/60 lg:col-span-4">
-        <CardHeader class="space-y-3">
+        <CardHeader class="space-y-2 px-4 py-3 sm:space-y-3 sm:px-6 sm:py-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <CardTitle class="flex items-center gap-2 text-base">
               <TrendingUp class="h-4 w-4" />
@@ -439,16 +439,19 @@ onMounted(refresh);
             </CardTitle>
 
             <Tabs v-model="bucket" class="w-full sm:w-auto">
-              <TabsList class="grid w-full grid-cols-3 sm:w-[320px]">
-                <TabsTrigger value="hour">Heures</TabsTrigger>
-                <TabsTrigger value="day">Jours</TabsTrigger>
-                <TabsTrigger value="month">Mois</TabsTrigger>
+              <TabsList
+                class="grid h-8 w-full grid-cols-3 text-xs sm:h-10 sm:w-[320px] sm:text-sm">
+                <TabsTrigger value="hour" class="h-7 sm:h-9"
+                  >Heures</TabsTrigger
+                >
+                <TabsTrigger value="day" class="h-7 sm:h-9">Jours</TabsTrigger>
+                <TabsTrigger value="month" class="h-7 sm:h-9">Mois</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
         </CardHeader>
-        <CardContent>
-          <div class="h-64">
+        <CardContent class="px-4 pb-4 sm:px-6 sm:pb-6">
+          <div class="h-40 sm:h-64">
             <Skeleton v-if="isLoading" class="h-full w-full" />
             <ChartContainer
               v-else
@@ -496,31 +499,32 @@ onMounted(refresh);
         </CardContent>
       </Card>
       <Card class="border-border bg-card/60 lg:col-span-3">
-        <CardHeader>
+        <CardHeader class="px-4 py-3 sm:px-6 sm:py-4">
           <CardTitle class="text-base">Derniers shifts</CardTitle>
         </CardHeader>
-        <CardContent class="space-y-3">
+        <CardContent
+          class="space-y-2 px-4 pb-4 sm:space-y-3 sm:px-6 sm:pb-6">
           <div v-if="isLoading" class="space-y-2">
-            <Skeleton class="h-12 w-full" />
-            <Skeleton class="h-12 w-full" />
-            <Skeleton class="h-12 w-full" />
+            <Skeleton class="h-10 w-full sm:h-12" />
+            <Skeleton class="h-10 w-full sm:h-12" />
+            <Skeleton class="h-10 w-full sm:h-12" />
           </div>
           <div
             v-else-if="recentCards.length === 0"
             class="text-sm text-muted-foreground">
             Aucun shift
           </div>
-          <div v-else class="space-y-2">
+          <div v-else class="space-y-1.5 sm:space-y-2">
             <NuxtLink
               v-for="card in recentCards"
               :key="card.id"
               :to="`/companies/${companyId}/sales-cards/${card.id}`"
-              class="block rounded-lg border border-border bg-background/40 px-3 py-2 hover:bg-accent/30">
+              class="block rounded-lg border border-border bg-background/40 px-2 py-1 text-[13px] hover:bg-accent/30 sm:px-3 sm:py-2 sm:text-sm">
               <div class="flex items-center justify-between gap-3">
-                <div class="text-sm font-medium">
+                <div class="font-medium">
                   {{ formatDate(card.startAt) }}
                 </div>
-                <div class="text-xs text-muted-foreground">
+                <div class="text-[11px] text-muted-foreground sm:text-xs">
                   {{ card.status }}
                 </div>
               </div>
