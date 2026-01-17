@@ -71,12 +71,6 @@ onMounted(async () => {
     />
 
     <main class="relative mx-auto w-full max-w-6xl space-y-6 px-6 py-10">
-      <div class="flex items-center justify-end">
-        <Button variant="outline" :disabled="sessionPending" @click="refreshAll">
-          Actualiser
-        </Button>
-      </div>
-
       <div class="grid gap-4 lg:grid-cols-3">
         <Card class="border-border bg-card/60 lg:col-span-1">
           <CardHeader class="space-y-1">
