@@ -35,9 +35,9 @@ const schema = toTypedSchema(
   z.object({
     email: z
       .string()
-      .min(1, "Email is required")
-      .email("Invalid email address"),
-    password: z.string().min(1, "Password is required"),
+      .min(1, "L'email est requis")
+      .email("Adresse email invalide"),
+    password: z.string().min(1, "Le mot de passe est requis"),
   })
 );
 
@@ -66,7 +66,7 @@ const onSubmit = form.handleSubmit(async (values) => {
     const message =
       (error as any)?.data?.message ||
       (error as any)?.message ||
-      "Sign in failed. Please check your credentials and try again.";
+      "La connexion a échoué. Vérifie tes identifiants et réessaie.";
     generalError.value = message;
   } finally {
     isLoading.value = false;
@@ -100,9 +100,9 @@ const togglePasswordVisibility = () => {
 
           <Card class="mt-6 border-border bg-card/60 shadow-xl backdrop-blur">
             <CardHeader class="space-y-1">
-              <CardTitle class="text-2xl">Sign in</CardTitle>
+              <CardTitle class="text-2xl">Connexion</CardTitle>
               <CardDescription>
-                Welcome back. Time to cash out the night.
+                Bon retour. On clôture la nuit proprement.
               </CardDescription>
             </CardHeader>
 
@@ -110,12 +110,12 @@ const togglePasswordVisibility = () => {
               <form @submit.prevent="onSubmit" class="space-y-4">
                 <FormField v-slot="{ componentField }" name="email">
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Adresse email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         v-bind="componentField"
-                        placeholder="you@example.com" />
+                        placeholder="vous@exemple.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,7 +123,7 @@ const togglePasswordVisibility = () => {
 
                 <FormField v-slot="{ componentField }" name="password">
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
                       <div class="relative">
                         <Input
@@ -157,7 +157,7 @@ const togglePasswordVisibility = () => {
                   type="submit"
                   :disabled="isLoading">
                   <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
-                  {{ isLoading ? "Signing in..." : "Sign in" }}
+                  {{ isLoading ? "Connexion..." : "Se connecter" }}
                 </Button>
               </form>
             </CardContent>
@@ -167,12 +167,12 @@ const togglePasswordVisibility = () => {
               <NuxtLink
                 class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
                 to="/">
-                Back to home
+                Retour à l'accueil
               </NuxtLink>
               <NuxtLink
                 class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
                 to="/sign-up">
-                Create account
+                Créer un compte
               </NuxtLink>
             </CardFooter>
           </Card>
@@ -188,11 +188,11 @@ const togglePasswordVisibility = () => {
         <div class="relative h-full p-10">
           <div class="max-w-lg">
             <h2 class="text-4xl font-bold tracking-tight">
-              Night shift in Los Santos
+              Service de nuit à Los Santos
             </h2>
             <p class="mt-4 text-muted-foreground">
-              Track every bottle, every drink, every shift. Keep your RP
-              business running clean.
+              Suis chaque bouteille, chaque vente, chaque shift. Garde ton
+              business RP propre et rentable.
             </p>
           </div>
         </div>

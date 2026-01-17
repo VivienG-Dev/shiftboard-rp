@@ -33,15 +33,18 @@ const { signUpEmail, isAuthenticated } = useAuth();
 
 const schema = toTypedSchema(
   z.object({
-    name: z.string().min(2, "Name is required").max(50, "Name is too long"),
+    name: z
+      .string()
+      .min(2, "Le nom est requis")
+      .max(50, "Le nom est trop long"),
     email: z
       .string()
-      .min(1, "Email is required")
-      .email("Invalid email address"),
+      .min(1, "L'email est requis")
+      .email("Adresse email invalide"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(72, "Password is too long"),
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .max(72, "Le mot de passe est trop long"),
   })
 );
 
@@ -70,7 +73,7 @@ const onSubmit = form.handleSubmit(async (values) => {
     const message =
       (error as any)?.data?.message ||
       (error as any)?.message ||
-      "Sign up failed. Please try again.";
+      "La création du compte a échoué. Réessaie.";
     generalError.value = message;
   } finally {
     isLoading.value = false;
@@ -104,9 +107,9 @@ const togglePasswordVisibility = () => {
 
           <Card class="mt-6 border-border bg-card/60 shadow-xl backdrop-blur">
             <CardHeader class="space-y-1">
-              <CardTitle class="text-2xl">Create account</CardTitle>
+              <CardTitle class="text-2xl">Créer un compte</CardTitle>
               <CardDescription>
-                Set up your profile and start managing your bar.
+                Configure ton profil et commence à gérer ton bar.
               </CardDescription>
             </CardHeader>
 
@@ -114,11 +117,11 @@ const togglePasswordVisibility = () => {
               <form @submit.prevent="onSubmit" class="space-y-4">
                 <FormField v-slot="{ componentField }" name="name">
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Nom</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
-                        placeholder="Your name"
+                        placeholder="Ton nom"
                         autocomplete="name" />
                     </FormControl>
                     <FormMessage />
@@ -127,12 +130,12 @@ const togglePasswordVisibility = () => {
 
                 <FormField v-slot="{ componentField }" name="email">
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Adresse email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         v-bind="componentField"
-                        placeholder="you@example.com"
+                        placeholder="vous@exemple.com"
                         autocomplete="email" />
                     </FormControl>
                     <FormMessage />
@@ -141,7 +144,7 @@ const togglePasswordVisibility = () => {
 
                 <FormField v-slot="{ componentField }" name="password">
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
                       <div class="relative">
                         <Input
@@ -176,7 +179,7 @@ const togglePasswordVisibility = () => {
                   type="submit"
                   :disabled="isLoading">
                   <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
-                  {{ isLoading ? "Creating account..." : "Create account" }}
+                  {{ isLoading ? "Création en cours..." : "Créer un compte" }}
                 </Button>
               </form>
             </CardContent>
@@ -186,12 +189,12 @@ const togglePasswordVisibility = () => {
               <NuxtLink
                 class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
                 to="/">
-                Back to home
+                Retour à l'accueil
               </NuxtLink>
               <NuxtLink
                 class="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
                 to="/sign-in">
-                Already have an account?
+                Déjà un compte ?
               </NuxtLink>
             </CardFooter>
           </Card>
@@ -206,10 +209,10 @@ const togglePasswordVisibility = () => {
           class="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
         <div class="relative h-full p-10">
           <div class="max-w-lg">
-            <h2 class="text-4xl font-bold tracking-tight">Join the crew</h2>
+            <h2 class="text-4xl font-bold tracking-tight">Rejoins l'équipe</h2>
             <p class="mt-4 text-muted-foreground">
-              Create a company, invite staff, and keep your inventory
-              accurate—shift after shift.
+              Crée une entreprise, invite l'équipe et garde ton inventaire à
+              jour, shift après shift.
             </p>
           </div>
         </div>
