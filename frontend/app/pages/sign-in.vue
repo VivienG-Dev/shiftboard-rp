@@ -63,10 +63,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     form.resetForm();
     router.push("/companies");
   } catch (error: unknown) {
-    const message =
+    let message =
       (error as any)?.data?.message ||
       (error as any)?.message ||
       "La connexion a échoué. Vérifie tes identifiants et réessaie.";
+    if (message === "Email not verified") {
+      message = "Email non vérifié. Vérifie ta boîte mail.";
+    }
     generalError.value = message;
   } finally {
     isLoading.value = false;
