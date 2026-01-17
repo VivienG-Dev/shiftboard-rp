@@ -3,11 +3,16 @@ import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { Resend } from 'resend';
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
 });
 const prisma = new PrismaClient({ adapter });
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const appName = process.env.APP_NAME ?? 'ShiftBoard RP';
+const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+const resendFrom = process.env.RESEND_FROM ?? 'ShiftBoard RP <no-reply@shiftboard.local>';
 export const auth = betterAuth({
   basePath: '/api/auth',
   trustedOrigins: (
@@ -19,5 +24,35 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      if (!resend) {
+        console.warn('RESEND_API_KEY is not set; skipping verification email.');
+        return;
+      }
+
+      const verifyUrl = url.startsWith('http') ? url : `${frontendUrl}${url}`;
+      await resend.emails.send({
+        from: resendFrom,
+        to: user.email,
+        subject: `Confirme ton email - ${appName}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;line-height:1.5">
+            <h2>Bienvenue sur ${appName}</h2>
+            <p>Confirme ton email pour activer ton compte.</p>
+            <p>
+              <a href="${verifyUrl}" style="display:inline-block;padding:10px 16px;background:#22d3ee;color:#0f172a;text-decoration:none;border-radius:8px;">
+                Vérifier mon email
+              </a>
+            </p>
+            <p>Si le bouton ne fonctionne pas, copie ce lien :</p>
+            <p>${verifyUrl}</p>
+          </div>
+        `,
+      });
+    },
   },
 });
