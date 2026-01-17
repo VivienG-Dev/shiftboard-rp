@@ -123,11 +123,6 @@ definePageMeta({
                 src="/images/app-preview.svg"
                 alt="Aperçu de l'application ShiftBoard RP"
                 class="h-full w-full object-cover" />
-              <div
-                class="flex items-center justify-between border-t border-border/70 bg-background/80 px-4 py-3 text-xs text-muted-foreground">
-                <span>Remplacez cette image par votre capture réelle</span>
-                <span class="text-cyan-300">1600×900 recommandé</span>
-              </div>
             </div>
           </div>
         </div>
