@@ -13,6 +13,7 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 const appName = process.env.APP_NAME ?? 'ShiftBoard RP';
 const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 const resendFrom = process.env.RESEND_FROM ?? 'ShiftBoard RP <no-reply@shiftboard.local>';
+const cookieDomain = process.env.COOKIE_DOMAIN;
 export const auth = betterAuth({
   basePath: '/api/auth',
   trustedOrigins: (
@@ -55,5 +56,11 @@ export const auth = betterAuth({
         `,
       });
     },
+  },
+  advanced: {
+    useSecureCookies: frontendUrl.startsWith('https://'),
+    ...(cookieDomain
+      ? { crossSubDomainCookies: { enabled: true, domain: cookieDomain } }
+      : {}),
   },
 });
