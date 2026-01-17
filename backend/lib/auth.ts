@@ -34,7 +34,8 @@ export const auth = betterAuth({
         return;
       }
 
-      const verifyUrl = url.startsWith('http') ? url : `${frontendUrl}${url}`;
+      const verifyUrl = new URL(url, frontendUrl);
+      verifyUrl.searchParams.set('callbackURL', `${frontendUrl}/sign-in?verified=1`);
       await resend.emails.send({
         from: resendFrom,
         to: user.email,
@@ -44,12 +45,12 @@ export const auth = betterAuth({
             <h2>Bienvenue sur ${appName}</h2>
             <p>Confirme ton email pour activer ton compte.</p>
             <p>
-              <a href="${verifyUrl}" style="display:inline-block;padding:10px 16px;background:#22d3ee;color:#0f172a;text-decoration:none;border-radius:8px;">
+              <a href="${verifyUrl.toString()}" style="display:inline-block;padding:10px 16px;background:#22d3ee;color:#0f172a;text-decoration:none;border-radius:8px;">
                 Vérifier mon email
               </a>
             </p>
             <p>Si le bouton ne fonctionne pas, copie ce lien :</p>
-            <p>${verifyUrl}</p>
+            <p>${verifyUrl.toString()}</p>
           </div>
         `,
       });
