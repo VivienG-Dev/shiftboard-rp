@@ -107,7 +107,7 @@ watch(
                 <Button
                   variant="ghost"
                   class="w-full text-base sm:w-auto sm:text-sm"
-                  @click="signOut"
+                  @click="signOut()"
                 >
                   Déconnexion
                 </Button>
@@ -185,7 +185,7 @@ watch(
                 <button
                   type="button"
                   class="flex items-center gap-3 rounded-xl px-3 py-3 text-lg font-semibold transition hover:bg-white/10"
-                  @click="signOut"
+                  @click="signOut()"
                 >
                   <LogOut class="h-5 w-5 text-white/70" />
                   Déconnexion
