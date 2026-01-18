@@ -5,6 +5,8 @@ type BetterAuthSession = {
 
 type SignInEmailResult = unknown;
 type SignUpEmailResult = unknown;
+type RequestPasswordResetResult = unknown;
+type ResetPasswordResult = unknown;
 
 export function useAuth() {
   const runtimeConfig = useRuntimeConfig();
@@ -65,6 +67,25 @@ export function useAuth() {
     session.value = null;
   }
 
+  async function requestPasswordReset(email: string, redirectTo?: string) {
+    const result = await authFetch<RequestPasswordResetResult>(
+      "request-password-reset",
+      {
+        method: "POST",
+        body: { email, redirectTo },
+      }
+    );
+    return result;
+  }
+
+  async function resetPassword(token: string, newPassword: string) {
+    const result = await authFetch<ResetPasswordResult>("reset-password", {
+      method: "POST",
+      body: { token, newPassword },
+    });
+    return result;
+  }
+
   return {
     session,
     sessionPending,
@@ -73,6 +94,8 @@ export function useAuth() {
     signInEmail,
     signUpEmail,
     signOut,
+    requestPasswordReset,
+    resetPassword,
   };
 }
 

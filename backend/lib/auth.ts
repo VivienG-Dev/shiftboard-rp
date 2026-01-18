@@ -26,6 +26,31 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      if (!resend) {
+        console.warn('RESEND_API_KEY is not set; skipping reset email.');
+        return;
+      }
+
+      await resend.emails.send({
+        from: resendFrom,
+        to: user.email,
+        subject: `Reinitialise ton mot de passe - ${appName}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;line-height:1.5">
+            <h2>Mot de passe oublie ?</h2>
+            <p>Clique pour definir un nouveau mot de passe.</p>
+            <p>
+              <a href="${url}" style="display:inline-block;padding:10px 16px;background:#22d3ee;color:#0f172a;text-decoration:none;border-radius:8px;">
+                Reinitialiser mon mot de passe
+              </a>
+            </p>
+            <p>Si le bouton ne fonctionne pas, copie ce lien :</p>
+            <p>${url}</p>
+          </div>
+        `,
+      });
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
