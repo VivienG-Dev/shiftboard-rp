@@ -62,9 +62,12 @@ export function useAuth() {
     return result;
   }
 
-  async function signOut() {
+  async function signOut(redirectTo: string = "/") {
     await authFetch("sign-out", { method: "POST" });
     session.value = null;
+    if (import.meta.client && redirectTo) {
+      await navigateTo(redirectTo);
+    }
   }
 
   async function requestPasswordReset(email: string, redirectTo?: string) {
