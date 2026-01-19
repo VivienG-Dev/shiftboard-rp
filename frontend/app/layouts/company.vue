@@ -16,6 +16,7 @@ import {
   Users,
   Truck,
   Shield,
+  Utensils,
 } from "lucide-vue-next";
 import {
   Sidebar,
@@ -163,6 +164,18 @@ const toggleTheme = () => {
                   <NuxtLink :to="`/companies/${companyId}/items`">
                     <Package />
                     <span>Inventaire</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  as-child
+                  :is-active="isActive(`/companies/${companyId}/menu`)"
+                  tooltip="Carte">
+                  <NuxtLink :to="`/companies/${companyId}/menu`">
+                    <Utensils />
+                    <span>Carte</span>
                   </NuxtLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
