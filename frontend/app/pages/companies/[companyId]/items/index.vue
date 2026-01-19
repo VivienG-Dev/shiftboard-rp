@@ -181,8 +181,8 @@ onMounted(refresh);
               <TableRow>
                 <TableHead>Nom</TableHead>
                 <TableHead>Catégorie</TableHead>
-                <TableHead>Unité</TableHead>
                 <TableHead>Prix de vente</TableHead>
+                <TableHead>Prix d'achat</TableHead>
                 <TableHead>Seuil stock</TableHead>
                 <TableHead class="text-right">Actions</TableHead>
               </TableRow>
@@ -213,10 +213,10 @@ onMounted(refresh);
                   formatCategory(item.category)
                 }}</TableCell>
                 <TableCell class="text-muted-foreground">{{
-                  item.unit
+                  formatMoney(item.basePrice)
                 }}</TableCell>
                 <TableCell class="text-muted-foreground">{{
-                  formatMoney(item.basePrice)
+                  formatMoney(item.costPrice)
                 }}</TableCell>
                 <TableCell class="text-muted-foreground">
                   {{ item.lowStockThreshold ?? "—" }}
