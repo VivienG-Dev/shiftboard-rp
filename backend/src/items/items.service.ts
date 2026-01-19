@@ -80,7 +80,7 @@ export class ItemsService {
     input: {
       name: string;
       category: ItemCategory;
-      unit: string;
+      unit?: string;
       basePrice?: number;
       costPrice?: number;
       lowStockThreshold?: number;
@@ -92,10 +92,7 @@ export class ItemsService {
     if (!name) {
       throw new BadRequestException('Item name is required');
     }
-    const unit = input.unit?.trim();
-    if (!unit) {
-      throw new BadRequestException('Item unit is required');
-    }
+    const unit = input.unit?.trim() || 'unite';
 
     try {
       return await this.prisma.item.create({
