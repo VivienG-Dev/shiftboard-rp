@@ -61,6 +61,10 @@ export class CompaniesService {
     }
 
     const companyType: CompanyType = input.type ?? 'OTHER';
+    const bankBalance =
+      input.bankBalance === undefined
+        ? undefined
+        : new Prisma.Decimal(String(input.bankBalance));
 
     const baseSlug = slugify(name);
     const slug = baseSlug || undefined;
@@ -73,6 +77,7 @@ export class CompaniesService {
             slug,
             type: companyType,
             ownerId: userId,
+            bankBalance,
           },
         });
 
