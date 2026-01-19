@@ -15,6 +15,7 @@ import { StockModule } from './stock/stock.module';
 import { KpisModule } from './kpis/kpis.module';
 import { RestocksModule } from './restocks/restocks.module';
 import { ChartsModule } from './charts/charts.module';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ChartsModule } from './charts/charts.module';
     KpisModule,
     ChartsModule,
     RestocksModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [
