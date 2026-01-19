@@ -70,6 +70,11 @@ const schema = toTypedSchema(
         v === "" || v === null || v === undefined ? undefined : Number(v),
       z.number().min(0, "Prix invalide").optional()
     ),
+    costPrice: z.preprocess(
+      (v) =>
+        v === "" || v === null || v === undefined ? undefined : Number(v),
+      z.number().min(0, "Prix invalide").optional()
+    ),
     lowStockThreshold: z.preprocess(
       (v) =>
         v === "" || v === null || v === undefined ? undefined : Number(v),
@@ -85,6 +90,7 @@ const form = useForm({
     category: "BOTTLE" as ItemCategory,
     unit: "bottle",
     basePrice: "",
+    costPrice: "",
     lowStockThreshold: "",
   },
 });
@@ -112,6 +118,7 @@ async function loadItem() {
       category: item.value.category,
       unit: item.value.unit,
       basePrice: item.value.basePrice ?? "",
+      costPrice: item.value.costPrice ?? "",
       lowStockThreshold: item.value.lowStockThreshold ?? "",
     });
   } catch (error: unknown) {
@@ -134,6 +141,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       category: values.category,
       unit: values.unit,
       basePrice: values.basePrice,
+      costPrice: values.costPrice,
       lowStockThreshold: values.lowStockThreshold,
     });
     router.push(`/companies/${companyId.value}/items`);
@@ -212,9 +220,19 @@ onMounted(loadItem);
           <div class="grid gap-4 md:grid-cols-2">
             <FormField v-slot="{ componentField }" name="basePrice">
               <FormItem>
-                <FormLabel>Prix (optionnel)</FormLabel>
+                <FormLabel>Prix de vente (optionnel)</FormLabel>
                 <FormControl>
                   <Input v-bind="componentField" type="number" min="0" placeholder="Ex: 250" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField v-slot="{ componentField }" name="costPrice">
+              <FormItem>
+                <FormLabel>Prix d'achat (optionnel)</FormLabel>
+                <FormControl>
+                  <Input v-bind="componentField" type="number" min="0" placeholder="Ex: 120" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -257,4 +275,3 @@ onMounted(loadItem);
     </Card>
   </div>
 </template>
-
