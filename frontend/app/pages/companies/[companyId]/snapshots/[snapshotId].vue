@@ -34,6 +34,16 @@ const { getSnapshot } = useCompanyInventory();
 const snapshot = ref<SnapshotDetail | null>(null);
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
+const totalCost = computed(() => {
+  if (!snapshot.value) return 0;
+  return snapshot.value.lines.reduce((sum, line) => {
+    const cost = line.item.costPrice;
+    if (cost === null || cost === undefined) return sum;
+    const value = typeof cost === "string" ? Number(cost) : cost;
+    if (Number.isNaN(value)) return sum;
+    return sum + value * line.quantity;
+  }, 0);
+});
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -41,6 +51,14 @@ function formatDate(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
 async function load() {
@@ -100,6 +118,9 @@ onMounted(load);
       <CardHeader class="space-y-1">
         <CardTitle class="text-lg">Détails</CardTitle>
         <CardDescription>{{ snapshot.note ?? "—" }}</CardDescription>
+        <p class="text-sm text-muted-foreground">
+          Valeur du stock: <span class="font-semibold text-foreground">{{ formatMoney(totalCost) }}</span>
+        </p>
       </CardHeader>
       <CardContent>
         <div class="rounded-xl border border-border bg-background/40">
