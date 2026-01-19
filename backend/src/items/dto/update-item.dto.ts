@@ -34,6 +34,11 @@ export class UpdateItemDto {
   basePrice?: number | null;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  costPrice?: number | null;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   lowStockThreshold?: number | null;

@@ -21,6 +21,11 @@ export class CreateItemDto {
   basePrice?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  costPrice?: number;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   lowStockThreshold?: number;
