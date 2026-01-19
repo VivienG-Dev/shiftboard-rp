@@ -82,6 +82,7 @@ export class ItemsService {
       category: ItemCategory;
       unit: string;
       basePrice?: number;
+      costPrice?: number;
       lowStockThreshold?: number;
     },
   ) {
@@ -104,6 +105,7 @@ export class ItemsService {
           category: input.category,
           unit,
           basePrice: input.basePrice === undefined ? undefined : new Prisma.Decimal(String(input.basePrice)),
+          costPrice: input.costPrice === undefined ? undefined : new Prisma.Decimal(String(input.costPrice)),
           lowStockThreshold: input.lowStockThreshold,
         },
       });
@@ -136,6 +138,7 @@ export class ItemsService {
       category?: ItemCategory;
       unit?: string;
       basePrice?: number | null;
+      costPrice?: number | null;
       lowStockThreshold?: number | null;
       isActive?: boolean;
     },
@@ -172,6 +175,12 @@ export class ItemsService {
               : input.basePrice === null
                 ? null
                 : new Prisma.Decimal(String(input.basePrice)),
+          costPrice:
+            input.costPrice === undefined
+              ? undefined
+              : input.costPrice === null
+                ? null
+                : new Prisma.Decimal(String(input.costPrice)),
           lowStockThreshold: input.lowStockThreshold,
         },
       });
