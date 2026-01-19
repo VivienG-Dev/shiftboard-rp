@@ -106,7 +106,7 @@ type ListItemsQuery = {
 type CreateItemInput = {
   name: string;
   category: ItemCategory;
-  unit: string;
+  unit?: string;
   basePrice?: number;
   costPrice?: number;
   lowStockThreshold?: number;
