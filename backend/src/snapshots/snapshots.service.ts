@@ -78,7 +78,9 @@ export class SnapshotsService {
         where: { id: snapshot.id },
         include: {
           lines: {
-            include: { item: { select: { id: true, name: true, unit: true, category: true } } },
+            include: {
+              item: { select: { id: true, name: true, unit: true, category: true, costPrice: true } },
+            },
             orderBy: { item: { name: 'asc' } },
           },
         },
@@ -110,7 +112,9 @@ export class SnapshotsService {
       where: { id: snapshotId, companyId },
       include: {
         lines: {
-          include: { item: { select: { id: true, name: true, unit: true, category: true } } },
+          include: {
+            item: { select: { id: true, name: true, unit: true, category: true, costPrice: true } },
+          },
           orderBy: { item: { name: 'asc' } },
         },
       },
@@ -123,4 +127,3 @@ export class SnapshotsService {
     return snapshot;
   }
 }
-
