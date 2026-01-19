@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from '../lib/auth';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CompaniesModule } from './companies/companies.module';
@@ -16,6 +18,12 @@ import { ChartsModule } from './charts/charts.module';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60,
+        limit: 300,
+      },
+    ]),
     AuthModule.forRoot({ auth }),
     PrismaModule,
     UserModule,
@@ -29,6 +37,12 @@ import { ChartsModule } from './charts/charts.module';
     RestocksModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
