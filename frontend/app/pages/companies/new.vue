@@ -51,6 +51,10 @@ const schema = toTypedSchema(
     type: z.enum(["BAR", "CLUB", "FAST_FOOD", "OTHER"], {
       required_error: "Le type est requis",
     }),
+    bankBalance: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().min(0, "Montant invalide").optional()
+    ),
   })
 );
 
@@ -59,6 +63,7 @@ const form = useForm({
   initialValues: {
     name: "",
     type: "BAR" as CompanyType,
+    bankBalance: "",
   },
 });
 
@@ -71,6 +76,7 @@ const onSubmit = form.handleSubmit(async (values) => {
     await createCompany({
       name: values.name,
       type: values.type,
+      bankBalance: values.bankBalance,
     });
     router.push("/companies");
   } catch (error: unknown) {
@@ -134,6 +140,23 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </FormControl>
                 <FormDescription>
                   Utilisé pour les futurs templates et permissions par défaut.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField v-slot="{ componentField }" name="bankBalance">
+              <FormItem>
+                <FormLabel>Cash initial (optionnel)</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 15000" />
+                </FormControl>
+                <FormDescription>
+                  Montant disponible au démarrage de l’entreprise.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
