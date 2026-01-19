@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -48,10 +49,19 @@ export class RestocksService {
 
     const items = await this.prisma.item.findMany({
       where: { companyId, archivedAt: null, id: { in: normalized.map((l) => l.itemId) } },
-      select: { id: true },
+      select: { id: true, costPrice: true },
     });
     if (items.length !== normalized.length) {
       throw new BadRequestException('One or more items do not exist in this company');
+    }
+
+    const itemById = new Map(items.map((item) => [item.id, item]));
+    let totalCost = new Prisma.Decimal(0);
+    for (const line of normalized) {
+      const item = itemById.get(line.itemId);
+      if (!item) continue;
+      const costPrice = item.costPrice ?? new Prisma.Decimal(0);
+      totalCost = totalCost.add(costPrice.mul(new Prisma.Decimal(line.quantityAdded)));
     }
 
     const note = input.note?.trim() || undefined;
@@ -71,6 +81,13 @@ export class RestocksService {
           quantityAdded: line.quantityAdded,
         })),
       });
+
+      if (!totalCost.isZero()) {
+        await tx.company.update({
+          where: { id: companyId },
+          data: { bankBalance: { decrement: totalCost } },
+        });
+      }
 
       return tx.restock.findUnique({
         where: { id: restock.id },
@@ -117,4 +134,3 @@ export class RestocksService {
     return restock;
   }
 }
-
