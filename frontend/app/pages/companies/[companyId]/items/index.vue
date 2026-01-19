@@ -182,7 +182,7 @@ onMounted(refresh);
                 <TableHead>Nom</TableHead>
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Unité</TableHead>
-                <TableHead>Prix</TableHead>
+                <TableHead>Prix de vente</TableHead>
                 <TableHead>Seuil stock</TableHead>
                 <TableHead class="text-right">Actions</TableHead>
               </TableRow>
