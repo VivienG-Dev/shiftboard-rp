@@ -13,6 +13,7 @@ export type Item = {
   category: ItemCategory;
   unit: string;
   basePrice: number | null;
+  costPrice: number | null;
   lowStockThreshold: number | null;
   isActive: boolean;
   createdAt: string;
@@ -48,7 +49,13 @@ export type SnapshotLine = {
   snapshotId: string;
   itemId: string;
   quantity: number;
-  item: { id: string; name: string; unit: string; category: ItemCategory };
+  item: {
+    id: string;
+    name: string;
+    unit: string;
+    category: ItemCategory;
+    costPrice: number | null;
+  };
 };
 
 export type SnapshotDetail = {
@@ -101,11 +108,13 @@ type CreateItemInput = {
   category: ItemCategory;
   unit: string;
   basePrice?: number;
+  costPrice?: number;
   lowStockThreshold?: number;
 };
 
 type UpdateItemInput = Partial<CreateItemInput> & {
   basePrice?: number | null;
+  costPrice?: number | null;
   lowStockThreshold?: number | null;
   isActive?: boolean;
 };

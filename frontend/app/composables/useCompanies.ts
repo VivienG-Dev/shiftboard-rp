@@ -12,6 +12,7 @@ export type Company = {
   slug: string | null;
   type: CompanyType;
   ownerId: string;
+  bankBalance?: number | null;
   locations?: CompanyLocation[];
 };
 
@@ -20,6 +21,7 @@ type ListCompaniesResponse = { data: Company[] };
 type CreateCompanyInput = {
   name: string;
   type?: CompanyType;
+  bankBalance?: number;
 };
 
 type CreateCompanyResponse = {
