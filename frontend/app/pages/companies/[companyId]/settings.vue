@@ -54,6 +54,18 @@ const companyTypes: Array<{ value: CompanyType; label: string }> = [
   { value: "OTHER", label: "Autre" },
 ];
 
+const moneyFormatter = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+});
+
+function formatMoney(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === "") return "—";
+  const numericValue = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(numericValue)) return "—";
+  return moneyFormatter.format(numericValue);
+}
+
 function syncForm(c: Company) {
   name.value = c.name ?? "";
   type.value = c.type ?? "OTHER";
@@ -192,6 +204,18 @@ onMounted(refresh);
           Enregistrer
         </Button>
       </CardFooter>
+    </Card>
+
+    <Card class="border-border bg-card/60">
+      <CardHeader class="space-y-1">
+        <CardTitle class="text-lg">Finances</CardTitle>
+        <CardDescription>Solde actuel de l'entreprise.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="text-2xl font-semibold">
+          {{ formatMoney(company?.bankBalance) }}
+        </div>
+      </CardContent>
     </Card>
 
     <Card class="border-destructive/30 bg-card/60">
