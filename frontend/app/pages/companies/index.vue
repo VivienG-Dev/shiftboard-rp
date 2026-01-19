@@ -72,12 +72,6 @@ onMounted(refresh);
             shifts.
           </p>
         </div>
-        <NuxtLink to="/companies/new">
-          <Button
-            class="bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
-            Créer une entreprise
-          </Button>
-        </NuxtLink>
       </div>
 
       <div
@@ -102,11 +96,35 @@ onMounted(refresh);
               Créer une entreprise
             </Button>
           </NuxtLink>
+          <NuxtLink to="/invites/accept">
+            <Button variant="outline">J’ai un code d’invitation</Button>
+          </NuxtLink>
           <Button variant="outline" @click="refresh"> Actualiser </Button>
         </div>
       </div>
 
       <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card class="border-dashed border-border/80 bg-card/40">
+          <CardHeader class="space-y-1">
+            <CardTitle class="text-lg">Actions rapides</CardTitle>
+            <CardDescription>
+              Crée une entreprise ou rejoins-en une avec un code.
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="flex flex-col gap-2">
+            <NuxtLink to="/companies/new">
+              <Button
+                class="w-full bg-linear-to-r from-cyan-400 to-pink-500 text-slate-950 hover:from-cyan-300 hover:to-pink-400">
+                Créer une entreprise
+              </Button>
+            </NuxtLink>
+            <NuxtLink to="/invites/accept">
+              <Button class="w-full" variant="outline">
+                J’ai un code d’invitation
+              </Button>
+            </NuxtLink>
+          </CardContent>
+        </Card>
         <Card
           v-for="company in companies"
           :key="company.id"
