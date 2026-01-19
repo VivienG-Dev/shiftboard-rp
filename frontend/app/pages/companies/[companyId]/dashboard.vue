@@ -8,6 +8,15 @@ definePageMeta({
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableEmpty,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useCompanyInventory } from "~/composables/useCompanyInventory";
 import { useCompanyShifts } from "~/composables/useCompanyShifts";
 import type { SalesCard } from "~/composables/useCompanyShifts";
@@ -61,6 +70,14 @@ const itemsSold = ref<number>(0);
 const activeStaff = ref<number>(0);
 const lowStock = ref<number>(0);
 const recentCards = ref<SalesCard[]>([]);
+const salesByDayLocation = ref<
+  Array<{
+    day: string;
+    locationName: string;
+    revenue: number;
+    itemsSold: number;
+  }>
+>([]);
 
 type ChartPoint = {
   x: number;
@@ -175,6 +192,48 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function getLocalDayKey(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10);
+  return date.toLocaleDateString("fr-CA");
+}
+
+function buildSalesByDayLocation(cards: SalesCard[]) {
+  const map = new Map<
+    string,
+    { day: string; locationName: string; revenue: number; itemsSold: number }
+  >();
+
+  for (const card of cards) {
+    if (card.status !== "SUBMITTED" && card.status !== "LOCKED") continue;
+    const day = getLocalDayKey(card.startAt);
+    const locationName = card.location?.name ?? "Sans lieu";
+    const key = `${day}__${locationName}`;
+
+    const current = map.get(key) ?? {
+      day,
+      locationName,
+      revenue: 0,
+      itemsSold: 0,
+    };
+
+    for (const line of card.lines ?? []) {
+      const qty = clampToNumber(line.quantitySold);
+      current.itemsSold += qty;
+      const lineTotal =
+        clampToNumber(line.total) || clampToNumber(line.unitPrice) * qty;
+      current.revenue += lineTotal;
+    }
+
+    map.set(key, current);
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    if (a.day === b.day) return a.locationName.localeCompare(b.locationName);
+    return b.day.localeCompare(a.day);
+  });
+}
+
 const revenueColor = computed(() =>
   colorMode.value === "dark" ? "hsl(188 92% 55%)" : "hsl(188 92% 42%)"
 );
@@ -215,13 +274,15 @@ async function refresh() {
   const chartFrom = startOfChartRange(now, bucket.value).toISOString();
 
   try {
-    const [stockRes, recentRes] = await Promise.all([
+    const [stockRes, recentRes, rangeSalesRes] = await Promise.all([
       getStock(companyId.value),
       listSalesCards(companyId.value),
+      listSalesCards(companyId.value, { from, to }),
     ]);
 
     lowStock.value = (stockRes.data ?? []).filter((r) => r.isLowStock).length;
     recentCards.value = (recentRes.data ?? []).slice(0, 6);
+    salesByDayLocation.value = buildSalesByDayLocation(rangeSalesRes.data ?? []);
   } catch (error: unknown) {
     const message =
       (error as any)?.data?.message ||
@@ -544,5 +605,58 @@ onMounted(refresh);
         </CardContent>
       </Card>
     </div>
+
+    <Card class="border-border bg-card/60">
+      <CardHeader class="space-y-1">
+        <CardTitle class="text-lg">Recettes par jour & lieu</CardTitle>
+        <CardDescription
+          >Total journalier par lieu sur la période sélectionnée.</CardDescription
+        >
+      </CardHeader>
+      <CardContent>
+        <div class="rounded-xl border border-border bg-background/40">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Lieu</TableHead>
+                <TableHead>Items vendus</TableHead>
+                <TableHead class="text-right">Revenu</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableEmpty
+                v-if="!isLoading && salesByDayLocation.length === 0"
+                :colspan="4">
+                Aucun revenu sur la période.
+              </TableEmpty>
+
+              <TableRow v-if="isLoading">
+                <TableCell colspan="4" class="text-muted-foreground"
+                  >Chargement…</TableCell
+                >
+              </TableRow>
+
+              <TableRow
+                v-for="row in salesByDayLocation"
+                :key="`${row.day}-${row.locationName}`">
+                <TableCell class="font-medium">{{
+                  formatDayLabel(row.day)
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  row.locationName
+                }}</TableCell>
+                <TableCell class="text-muted-foreground">{{
+                  row.itemsSold.toLocaleString("fr-FR")
+                }}</TableCell>
+                <TableCell class="text-right font-medium">{{
+                  formatMoney(row.revenue)
+                }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   </div>
 </template>
