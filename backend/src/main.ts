@@ -14,6 +14,10 @@ async function bootstrap() {
 
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.disable('x-powered-by');
+  // Trust reverse proxy headers in production for rate limiting and IP detection.
+  if (process.env.NODE_ENV === 'production') {
+    expressApp.set('trust proxy', 1);
+  }
   app.use(helmet());
 
   const trustedOrigins =
