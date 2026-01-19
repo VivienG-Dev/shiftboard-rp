@@ -159,7 +159,11 @@ onMounted(refresh);
 
           <NativeSelect
             :value="category"
-            @change="category = ($event.target as HTMLSelectElement).value"
+            @change="
+              category = ($event.target as HTMLSelectElement).value as
+                | ItemCategory
+                | 'ALL'
+            "
           >
             <option
               v-for="opt in categoryOptions"
