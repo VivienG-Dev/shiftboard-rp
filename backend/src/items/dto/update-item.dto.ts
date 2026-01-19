@@ -23,8 +23,8 @@ export class UpdateItemDto {
   category?: ItemCategory;
 
   @IsOptional()
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(32)
   unit?: string;
 

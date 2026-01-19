@@ -63,8 +63,8 @@ const schema = toTypedSchema(
     ]),
     unit: z
       .string()
-      .min(1, "L'unité est requise")
-      .max(32, "L'unité est trop longue"),
+      .max(32, "Le conditionnement est trop long")
+      .optional(),
     basePrice: z.preprocess(
       (v) =>
         v === "" || v === null || v === undefined ? undefined : Number(v),
@@ -88,7 +88,6 @@ const form = useForm({
   initialValues: {
     name: "",
     category: "BOTTLE" as ItemCategory,
-    unit: "bottle",
     basePrice: "",
     costPrice: "",
     lowStockThreshold: "",
@@ -116,7 +115,6 @@ async function loadItem() {
     form.setValues({
       name: item.value.name,
       category: item.value.category,
-      unit: item.value.unit,
       basePrice: item.value.basePrice ?? "",
       costPrice: item.value.costPrice ?? "",
       lowStockThreshold: item.value.lowStockThreshold ?? "",
@@ -139,7 +137,6 @@ const onSubmit = form.handleSubmit(async (values) => {
     await updateItem(companyId.value, itemId.value, {
       name: values.name,
       category: values.category,
-      unit: values.unit,
       basePrice: values.basePrice,
       costPrice: values.costPrice,
       lowStockThreshold: values.lowStockThreshold,
@@ -201,17 +198,6 @@ onMounted(loadItem);
                     </option>
                   </NativeSelect>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-
-            <FormField v-slot="{ componentField }" name="unit">
-              <FormItem>
-                <FormLabel>Unité <span class="text-red-400">*</span></FormLabel>
-                <FormControl>
-                  <Input v-bind="componentField" placeholder="Ex: bottle" autocomplete="off" />
-                </FormControl>
-                <FormDescription>Exemples: bottle, glass, piece.</FormDescription>
                 <FormMessage />
               </FormItem>
             </FormField>

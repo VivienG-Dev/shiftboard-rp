@@ -10,10 +10,10 @@ export class CreateItemDto {
   @IsEnum(ItemCategory)
   category!: ItemCategory;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(32)
-  unit!: string;
+  unit?: string;
 
   @IsOptional()
   @IsNumber()
