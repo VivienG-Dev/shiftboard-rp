@@ -16,6 +16,7 @@ import { KpisModule } from './kpis/kpis.module';
 import { RestocksModule } from './restocks/restocks.module';
 import { ChartsModule } from './charts/charts.module';
 import { MenuModule } from './menu/menu.module';
+import { AnnualModule } from './annual/annual.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MenuModule } from './menu/menu.module';
     ChartsModule,
     RestocksModule,
     MenuModule,
+    AnnualModule,
   ],
   controllers: [AppController],
   providers: [
