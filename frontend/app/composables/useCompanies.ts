@@ -39,7 +39,9 @@ type CreateCompanyLocationInput = {
 
 type CreateCompanyLocationResponse = { data: CompanyLocation };
 
-type UpdateCompanyInput = Partial<Pick<Company, "name" | "type">>;
+type UpdateCompanyInput = Partial<Pick<Company, "name" | "type">> & {
+  bankBalance?: number;
+};
 type UpdateCompanyResponse = { data: Company };
 
 type ArchiveCompanyResponse = { data: Company };

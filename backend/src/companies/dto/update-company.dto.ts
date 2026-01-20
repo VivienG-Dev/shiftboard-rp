@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { CompanyType } from '../../../generated/prisma/enums';
 
 export class UpdateCompanyDto {
@@ -10,4 +10,9 @@ export class UpdateCompanyDto {
   @IsOptional()
   @IsEnum(CompanyType)
   type?: CompanyType;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  bankBalance?: number;
 }

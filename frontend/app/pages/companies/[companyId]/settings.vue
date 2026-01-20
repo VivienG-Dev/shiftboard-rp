@@ -39,6 +39,7 @@ const { getCompany, updateCompany, archiveCompany } = useCompanies();
 const company = ref<Company | null>(null);
 const isLoading = ref(true);
 const isSaving = ref(false);
+const isSavingBalance = ref(false);
 const isArchiving = ref(false);
 const errorMessage = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
@@ -46,6 +47,7 @@ const archiveDialogOpen = ref(false);
 
 const name = ref("");
 const type = ref<CompanyType>("OTHER");
+const bankBalance = ref<string>("");
 
 const companyTypes: Array<{ value: CompanyType; label: string }> = [
   { value: "BAR", label: "Bar" },
@@ -69,6 +71,7 @@ function formatMoney(value: string | number | null | undefined) {
 function syncForm(c: Company) {
   name.value = c.name ?? "";
   type.value = c.type ?? "OTHER";
+  bankBalance.value = c.bankBalance === null || c.bankBalance === undefined ? "" : String(c.bankBalance);
 }
 
 async function refresh() {
@@ -111,6 +114,35 @@ async function onSave() {
     errorMessage.value = message;
   } finally {
     isSaving.value = false;
+  }
+}
+
+async function onSaveBankBalance() {
+  if (!company.value) return;
+  errorMessage.value = null;
+  successMessage.value = null;
+  isSavingBalance.value = true;
+  try {
+    const parsed =
+      bankBalance.value === "" || bankBalance.value === null || bankBalance.value === undefined
+        ? NaN
+        : Number(bankBalance.value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      throw new Error("Montant invalide");
+    }
+
+    const res = await updateCompany(companyId.value, { bankBalance: parsed });
+    company.value = res.data;
+    syncForm(res.data);
+    successMessage.value = "Solde mis à jour.";
+  } catch (error: unknown) {
+    const message =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Impossible de mettre à jour le solde.";
+    errorMessage.value = message;
+  } finally {
+    isSavingBalance.value = false;
   }
 }
 
@@ -209,11 +241,39 @@ onMounted(refresh);
     <Card class="border-border bg-card/60">
       <CardHeader class="space-y-1">
         <CardTitle class="text-lg">Finances</CardTitle>
-        <CardDescription>Solde actuel de l'entreprise.</CardDescription>
+        <CardDescription>Solde actuel et ajustement manuel.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-semibold">
-          {{ formatMoney(company?.bankBalance) }}
+        <div class="space-y-4">
+          <div class="text-2xl font-semibold">
+            {{ formatMoney(company?.bankBalance) }}
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Définir le solde</label>
+              <Input
+                v-model="bankBalance"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Ex: 15000" />
+              <div class="text-xs text-muted-foreground">
+                Crée un mouvement bancaire <span class="font-medium">MANUAL</span> (delta).
+              </div>
+            </div>
+            <div class="flex items-end">
+              <Button
+                class="w-full"
+                variant="secondary"
+                :disabled="isLoading || isSavingBalance || bankBalance === ''"
+                @click="onSaveBankBalance"
+              >
+                <Loader2 v-if="isSavingBalance" class="mr-2 h-4 w-4 animate-spin" />
+                Mettre à jour le solde
+              </Button>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

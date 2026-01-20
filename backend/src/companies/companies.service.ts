@@ -228,11 +228,16 @@ export class CompaniesService {
   async updateCompany(
     userId: string,
     companyId: string,
-    input: { name?: string; type?: CompanyType },
+    input: { name?: string; type?: CompanyType; bankBalance?: number },
   ) {
     const existing = await this.getCompany(userId, companyId);
 
-    const data: { name?: string; slug?: string | null; type?: CompanyType } = {};
+    const data: {
+      name?: string;
+      slug?: string | null;
+      type?: CompanyType;
+      bankBalance?: { increment: Prisma.Decimal };
+    } = {};
 
     if (input.name !== undefined) {
       const name = input.name?.trim();
@@ -249,20 +254,50 @@ export class CompaniesService {
       data.type = input.type;
     }
 
+    if (input.bankBalance !== undefined) {
+      const nextBalance = new Prisma.Decimal(String(input.bankBalance));
+      if (nextBalance.isNegative()) {
+        throw new BadRequestException('bankBalance must be >= 0');
+      }
+      const currentBalance =
+        existing.bankBalance instanceof Prisma.Decimal
+          ? existing.bankBalance
+          : new Prisma.Decimal(String(existing.bankBalance ?? 0));
+      const delta = nextBalance.sub(currentBalance);
+      if (!delta.isZero()) {
+        data.bankBalance = { increment: delta };
+      }
+    }
+
     if (!Object.keys(data).length) {
       throw new BadRequestException('No fields to update');
     }
 
     try {
-      return await this.prisma.company.update({
-        where: { id: companyId },
-        data,
-        include: {
-          locations: {
-            where: { archivedAt: null },
-            orderBy: { createdAt: 'desc' },
+      return await this.prisma.$transaction(async (tx) => {
+        const updated = await tx.company.update({
+          where: { id: companyId },
+          data,
+          include: {
+            locations: {
+              where: { archivedAt: null },
+              orderBy: { createdAt: 'desc' },
+            },
           },
-        },
+        });
+
+        if (data.bankBalance?.increment && !data.bankBalance.increment.isZero()) {
+          await tx.companyBankMovement.create({
+            data: {
+              companyId,
+              type: 'MANUAL',
+              amount: data.bankBalance.increment,
+              note: 'Manual balance adjustment',
+            },
+          });
+        }
+
+        return updated;
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
