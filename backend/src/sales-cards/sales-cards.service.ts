@@ -331,6 +331,12 @@ export class SalesCardsService {
         })
       : [];
     const basePriceById = new Map(items.map((i) => [i.id, i.basePrice] as const));
+    let totalRevenue = new Prisma.Decimal(0);
+    for (const line of card.lines) {
+      const basePrice = basePriceById.get(line.itemId) ?? null;
+      if (basePrice === null) continue;
+      totalRevenue = totalRevenue.add(basePrice.mul(new Prisma.Decimal(line.quantitySold)));
+    }
 
     return this.prisma.$transaction(async (tx) => {
       for (const line of card.lines) {
@@ -348,6 +354,23 @@ export class SalesCardsService {
         where: { id: card.id },
         data: { status: 'SUBMITTED', endAt },
       });
+
+      if (!totalRevenue.isZero()) {
+        await tx.company.update({
+          where: { id: companyId },
+          data: { bankBalance: { increment: totalRevenue } },
+        });
+
+        await tx.companyBankMovement.create({
+          data: {
+            companyId,
+            type: Prisma.CompanyBankMovementType.SALES_CARD,
+            amount: totalRevenue,
+            salesCardId: card.id,
+            createdAt: endAt,
+          },
+        });
+      }
 
       return tx.salesCard.findUnique({
         where: { id: card.id },
