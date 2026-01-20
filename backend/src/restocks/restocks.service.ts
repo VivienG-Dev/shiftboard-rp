@@ -87,6 +87,16 @@ export class RestocksService {
           where: { id: companyId },
           data: { bankBalance: { decrement: totalCost } },
         });
+
+        await tx.companyBankMovement.create({
+          data: {
+            companyId,
+            type: Prisma.CompanyBankMovementType.RESTOCK,
+            amount: new Prisma.Decimal(0).sub(totalCost),
+            restockId: restock.id,
+            createdAt: restock.createdAt,
+          },
+        });
       }
 
       return tx.restock.findUnique({
