@@ -123,6 +123,48 @@ export class AnnualService {
       });
     }
 
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { bankBalance: true },
+    });
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    const movementSum = await this.prisma.companyBankMovement.aggregate({
+      where: { companyId, createdAt: { gte: from, lt: to } },
+      _sum: { amount: true },
+    });
+    const yearMovementSum = movementSum._sum.amount ?? new Prisma.Decimal(0);
+    const yearStartBalance = company.bankBalance.sub(yearMovementSum);
+
+    const movements = await this.prisma.companyBankMovement.findMany({
+      where: { companyId, createdAt: { gte: from, lt: to } },
+      select: { amount: true, type: true, createdAt: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const movementByDate = new Map<
+      string,
+      { amount: Prisma.Decimal; revenue: number; expenses: number }
+    >();
+    for (const movement of movements) {
+      const dateKey = toYmd(toTzDate(movement.createdAt, tzOffsetMinutes));
+      const bucket =
+        movementByDate.get(dateKey) ??
+        { amount: new Prisma.Decimal(0), revenue: 0, expenses: 0 };
+
+      const amountNumber = decimalToNumber(movement.amount) ?? 0;
+      bucket.amount = bucket.amount.add(movement.amount);
+      if (movement.type === 'SALES_CARD') {
+        bucket.revenue += amountNumber;
+      } else if (movement.type === 'RESTOCK') {
+        bucket.expenses += Math.abs(amountNumber);
+      }
+
+      movementByDate.set(dateKey, bucket);
+    }
+
     const lines = await this.prisma.salesCardLine.findMany({
       where: {
         salesCard: {
@@ -149,43 +191,58 @@ export class AnnualService {
       },
     });
 
-    const autoByDate = new Map<string, { revenue: number; itemsSold: number; cost: number }>();
+    const itemsByDate = new Map<string, { itemsSold: number; cost: number }>();
     for (const line of lines) {
       const endAt = line.salesCard.endAt ?? line.salesCard.startAt;
       const dateKey = toYmd(toTzDate(endAt, tzOffsetMinutes));
-      const bucket = autoByDate.get(dateKey) ?? { revenue: 0, itemsSold: 0, cost: 0 };
-
-      const total = line.total !== null && line.total !== undefined ? decimalToNumber(line.total) : null;
-      const unitPrice = line.unitPrice !== null && line.unitPrice !== undefined ? decimalToNumber(line.unitPrice) : null;
-      const lineRevenue =
-        total !== null ? total : unitPrice !== null ? unitPrice * line.quantitySold : 0;
+      const bucket = itemsByDate.get(dateKey) ?? { itemsSold: 0, cost: 0 };
 
       const costPrice = line.item?.costPrice ? decimalToNumber(line.item.costPrice) : null;
       const lineCost = costPrice !== null ? costPrice * line.quantitySold : 0;
 
-      bucket.revenue += lineRevenue;
       bucket.itemsSold += line.quantitySold;
       bucket.cost += lineCost;
-      autoByDate.set(dateKey, bucket);
+      itemsByDate.set(dateKey, bucket);
     }
 
     const rows: AnnualRow[] = [];
     for (const [date, entry] of manualByDate.entries()) {
       rows.push(entry);
     }
-    for (const [date, bucket] of autoByDate.entries()) {
-      if (manualByDate.has(date)) continue;
-      rows.push({
-        id: null,
-        date,
-        revenue: bucket.revenue,
-        expenses: null,
-        startingCapital: null,
-        total: null,
-        itemsSold: bucket.itemsSold,
-        profit: bucket.revenue - bucket.cost,
-        source: 'AUTO',
-      });
+
+    const dateKeys = Array.from(
+      new Set([...movementByDate.keys(), ...itemsByDate.keys()]),
+    ).sort((a, b) => a.localeCompare(b));
+
+    let runningBalance = yearStartBalance;
+    for (const date of dateKeys) {
+      const movement = movementByDate.get(date) ?? {
+        amount: new Prisma.Decimal(0),
+        revenue: 0,
+        expenses: 0,
+      };
+      const items = itemsByDate.get(date) ?? { itemsSold: 0, cost: 0 };
+      const startingCapital = decimalToNumber(runningBalance);
+      const total =
+        startingCapital === null
+          ? null
+          : startingCapital + movement.revenue - movement.expenses;
+
+      if (!manualByDate.has(date)) {
+        rows.push({
+          id: null,
+          date,
+          revenue: movement.revenue || 0,
+          expenses: movement.expenses || 0,
+          startingCapital,
+          total,
+          itemsSold: items.itemsSold,
+          profit: movement.revenue - items.cost,
+          source: 'AUTO',
+        });
+      }
+
+      runningBalance = runningBalance.add(movement.amount);
     }
 
     rows.sort((a, b) => a.date.localeCompare(b.date));
