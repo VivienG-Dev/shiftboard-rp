@@ -17,6 +17,7 @@ import {
   Truck,
   Shield,
   Utensils,
+  CalendarRange,
 } from "lucide-vue-next";
 import {
   Sidebar,
@@ -176,6 +177,18 @@ const toggleTheme = () => {
                   <NuxtLink :to="`/companies/${companyId}/menu`">
                     <Utensils />
                     <span>Carte</span>
+                  </NuxtLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  as-child
+                  :is-active="isActive(`/companies/${companyId}/annual`)"
+                  tooltip="Historique annuel">
+                  <NuxtLink :to="`/companies/${companyId}/annual`">
+                    <CalendarRange />
+                    <span>Historique annuel</span>
                   </NuxtLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
