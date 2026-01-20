@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma/client';
+import { CompanyBankMovementType, Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -91,7 +91,7 @@ export class RestocksService {
         await tx.companyBankMovement.create({
           data: {
             companyId,
-            type: Prisma.CompanyBankMovementType.RESTOCK,
+            type: CompanyBankMovementType.RESTOCK,
             amount: new Prisma.Decimal(0).sub(totalCost),
             restockId: restock.id,
             createdAt: restock.createdAt,

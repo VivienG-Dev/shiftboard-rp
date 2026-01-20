@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma/client';
+import { CompanyBankMovementType, Prisma } from '../../generated/prisma/client';
 import type { SalesCardStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { PermissionKey } from '../auth/permissions';
@@ -364,7 +364,7 @@ export class SalesCardsService {
         await tx.companyBankMovement.create({
           data: {
             companyId,
-            type: Prisma.CompanyBankMovementType.SALES_CARD,
+            type: CompanyBankMovementType.SALES_CARD,
             amount: totalRevenue,
             salesCardId: card.id,
             createdAt: endAt,
