@@ -46,6 +46,12 @@ enum InviteType {
   EMAIL_CODE
 }
 
+enum CompanyBankMovementType {
+  RESTOCK
+  SALES_CARD
+  MANUAL
+}
+
 model User {
   id            String    @id
   name          String
@@ -86,6 +92,7 @@ model Company {
   items              Item[]
   menuEntries        MenuEntry[]
   annualEntries      AnnualEntry[]
+  bankMovements      CompanyBankMovement[]
   inventorySnapshots InventorySnapshot[]
   restocks          Restock[]
   salesCards         SalesCard[]
@@ -96,6 +103,26 @@ model Company {
   @@unique([ownerId, name])
   @@index([ownerId])
   @@map("company")
+}
+
+model CompanyBankMovement {
+  id         String                   @id @default(cuid())
+  companyId  String
+  type       CompanyBankMovementType
+  amount     Decimal                  @db.Decimal(12, 2)
+  note       String?
+  restockId  String?
+  salesCardId String?
+  createdAt  DateTime                 @default(now())
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  restock   Restock?   @relation(fields: [restockId], references: [id], onDelete: SetNull)
+  salesCard SalesCard? @relation(fields: [salesCardId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([restockId])
+  @@index([salesCardId])
+  @@map("company_bank_movement")
 }
 
 model CompanyLocation {
@@ -276,6 +303,7 @@ model Restock {
   createdBy User    @relation("RestockCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
 
   lines RestockLine[]
+  bankMovements CompanyBankMovement[]
 
   @@index([companyId, createdAt])
   @@index([createdById])
@@ -315,6 +343,7 @@ model SalesCard {
   role    CompanyRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   lines SalesCardLine[]
+  bankMovements CompanyBankMovement[]
 
   @@index([companyId, startAt])
   @@index([companyId, userId, status])
