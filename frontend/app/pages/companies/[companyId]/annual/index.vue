@@ -87,15 +87,20 @@ function sourceLabel(source: AnnualEntryRow["source"]) {
   return source === "MANUAL" ? "Manuel" : "Auto";
 }
 
+function toTrimmedString(value: unknown) {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+}
+
 function parseNumber(value: string) {
-  const trimmed = value.trim();
+  const trimmed = toTrimmedString(value);
   if (!trimmed) return undefined;
   const num = Number(trimmed.replace(",", "."));
   return Number.isFinite(num) ? num : undefined;
 }
 
 function parseCount(value: string) {
-  const trimmed = value.trim();
+  const trimmed = toTrimmedString(value);
   if (!trimmed) return undefined;
   const num = Number(trimmed);
   if (!Number.isFinite(num)) return undefined;
@@ -140,7 +145,7 @@ async function onCreate() {
       total: parseNumber(form.total),
       itemsSold: parseCount(form.itemsSold),
       profit: parseNumber(form.profit),
-      note: form.note.trim() || undefined,
+      note: toTrimmedString(form.note) || undefined,
       tzOffsetMinutes: getTzOffsetMinutes(),
     });
 
