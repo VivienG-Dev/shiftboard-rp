@@ -85,6 +85,7 @@ model Company {
   roles              CompanyRole[]
   items              Item[]
   menuEntries        MenuEntry[]
+  annualEntries      AnnualEntry[]
   inventorySnapshots InventorySnapshot[]
   restocks          Restock[]
   salesCards         SalesCard[]
@@ -210,6 +211,27 @@ model MenuEntry {
   @@index([companyId])
   @@index([itemId])
   @@map("menu_entry")
+}
+
+model AnnualEntry {
+  id              String   @id @default(cuid())
+  companyId       String
+  date            DateTime
+  revenue         Decimal? @db.Decimal(12, 2)
+  expenses        Decimal? @db.Decimal(12, 2)
+  startingCapital Decimal? @db.Decimal(12, 2)
+  total           Decimal? @db.Decimal(12, 2)
+  itemsSold       Int?
+  profit          Decimal? @db.Decimal(12, 2)
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, date])
+  @@index([companyId, date])
+  @@map("annual_entry")
 }
 
 model InventorySnapshot {
