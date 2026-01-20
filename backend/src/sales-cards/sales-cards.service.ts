@@ -78,6 +78,17 @@ export class SalesCardsService {
       orderBy: { startAt: 'desc' },
       include: {
         location: { select: { id: true, name: true } },
+        lines: {
+          select: {
+            id: true,
+            salesCardId: true,
+            itemId: true,
+            quantitySold: true,
+            unitPrice: true,
+            total: true,
+            item: { select: { id: true, name: true, unit: true, category: true } },
+          },
+        },
         _count: { select: { lines: true } },
       },
     });
