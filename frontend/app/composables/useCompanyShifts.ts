@@ -9,6 +9,7 @@ export type SalesCardLine = {
   salesCardId: string;
   itemId: string;
   quantitySold: number;
+  quantityOffered: number;
   unitPrice: unknown;
   total: unknown;
   item: { id: string; name: string; unit: string; category: ItemCategory };
@@ -41,7 +42,7 @@ type StartSalesCardInput = {
 
 type UpdateSalesCardInput = {
   note?: string;
-  lines?: Array<{ itemId: string; quantitySold: number }>;
+  lines?: Array<{ itemId: string; quantitySold: number; quantityOffered?: number }>;
 };
 
 type StopSalesCardInput = { endAt?: string };

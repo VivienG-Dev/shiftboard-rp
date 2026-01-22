@@ -64,11 +64,12 @@ export class StockService {
           startAt: { gte: latestSnapshot.createdAt },
         },
       },
-      select: { itemId: true, quantitySold: true },
+      select: { itemId: true, quantitySold: true, quantityOffered: true },
     });
     const soldByItemId = new Map<string, number>();
     for (const line of soldLines) {
-      soldByItemId.set(line.itemId, (soldByItemId.get(line.itemId) ?? 0) + line.quantitySold);
+      const depleted = (line.quantitySold ?? 0) + (line.quantityOffered ?? 0);
+      soldByItemId.set(line.itemId, (soldByItemId.get(line.itemId) ?? 0) + depleted);
     }
 
     const restockLines = await this.prisma.restockLine.findMany({

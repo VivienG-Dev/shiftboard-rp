@@ -175,6 +175,7 @@ export class AnnualService {
       },
       select: {
         quantitySold: true,
+        quantityOffered: true,
         total: true,
         unitPrice: true,
         salesCard: {
@@ -198,7 +199,8 @@ export class AnnualService {
       const bucket = itemsByDate.get(dateKey) ?? { itemsSold: 0, cost: 0 };
 
       const costPrice = line.item?.costPrice ? decimalToNumber(line.item.costPrice) : null;
-      const lineCost = costPrice !== null ? costPrice * line.quantitySold : 0;
+      const depleted = line.quantitySold + (line.quantityOffered ?? 0);
+      const lineCost = costPrice !== null ? costPrice * depleted : 0;
 
       bucket.itemsSold += line.quantitySold;
       bucket.cost += lineCost;

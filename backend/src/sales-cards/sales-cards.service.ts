@@ -84,6 +84,7 @@ export class SalesCardsService {
             salesCardId: true,
             itemId: true,
             quantitySold: true,
+            quantityOffered: true,
             unitPrice: true,
             total: true,
             item: { select: { id: true, name: true, unit: true, category: true } },
@@ -197,7 +198,10 @@ export class SalesCardsService {
     userId: string,
     companyId: string,
     cardId: string,
-    input: { note?: string; lines?: { itemId: string; quantitySold: number }[] },
+    input: {
+      note?: string;
+      lines?: { itemId: string; quantitySold: number; quantityOffered?: number }[];
+    },
   ) {
     const membership = await this.assertCompanyAccess(userId, companyId);
 
@@ -245,6 +249,7 @@ export class SalesCardsService {
     const normalized = lines.map((line) => ({
       itemId: String(line.itemId).trim(),
       quantitySold: line.quantitySold,
+      quantityOffered: line.quantityOffered ?? 0,
     }));
 
     const invalidItemId = normalized.find((line) => !line.itemId);
@@ -260,7 +265,9 @@ export class SalesCardsService {
       duplicateIds.add(line.itemId);
     }
 
-    const positiveLines = normalized.filter((line) => line.quantitySold > 0);
+    const positiveLines = normalized.filter(
+      (line) => line.quantitySold > 0 || line.quantityOffered > 0,
+    );
     const items = await this.prisma.item.findMany({
       where: { companyId, archivedAt: null, id: { in: positiveLines.map((l) => l.itemId) } },
       select: { id: true },
@@ -282,6 +289,7 @@ export class SalesCardsService {
             salesCardId: card.id,
             itemId: line.itemId,
             quantitySold: line.quantitySold,
+            quantityOffered: line.quantityOffered,
             unitPrice: null,
             total: null,
           })),
@@ -311,7 +319,7 @@ export class SalesCardsService {
 
     const card = await this.prisma.salesCard.findFirst({
       where: { id: cardId, companyId },
-      include: { lines: { select: { id: true, itemId: true, quantitySold: true } } },
+      include: { lines: { select: { id: true, itemId: true, quantitySold: true, quantityOffered: true } } },
     });
     if (!card) {
       throw new NotFoundException('Sales card not found');

@@ -19,6 +19,11 @@ class UpdateSalesCardLineDto {
   @IsInt()
   @Min(0)
   quantitySold!: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  quantityOffered?: number;
 }
 
 export class UpdateSalesCardDto {
