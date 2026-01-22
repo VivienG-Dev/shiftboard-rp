@@ -81,6 +81,7 @@ const startLocationId = ref<string>("");
 
 const editNote = ref("");
 const quantities = ref<Record<string, number | null | undefined>>({});
+const offeredQuantities = ref<Record<string, number | null | undefined>>({});
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -116,17 +117,24 @@ function hydrateFromCard(card: SalesCard | null) {
   if (!card) {
     editNote.value = "";
     quantities.value = {};
+    offeredQuantities.value = {};
     return;
   }
 
   editNote.value = card.note ?? "";
 
   const next: Record<string, number | null | undefined> = {};
-  for (const item of items.value) next[item.id] = null;
+  const nextOffered: Record<string, number | null | undefined> = {};
+  for (const item of items.value) {
+    next[item.id] = null;
+    nextOffered[item.id] = null;
+  }
   for (const line of card.lines ?? []) {
     next[line.itemId] = line.quantitySold;
+    nextOffered[line.itemId] = line.quantityOffered ?? 0;
   }
   quantities.value = next;
+  offeredQuantities.value = nextOffered;
 }
 
 async function loadAll() {
@@ -188,35 +196,53 @@ async function onSave() {
   successMessage.value = null;
   isSaving.value = true;
   try {
-    const lines = Object.entries(quantities.value)
-      .map(([itemId, qty]) => ({
-        itemId,
-        quantitySold: parseNonNegativeInt(qty),
-      }))
-      .filter((l) => l.quantitySold !== null);
+    const itemIds = new Set<string>([
+      ...Object.keys(quantities.value),
+      ...Object.keys(offeredQuantities.value),
+    ]);
 
-    if (lines.some((l) => Number.isNaN(l.quantitySold))) {
+    const lines = Array.from(itemIds)
+      .map((itemId) => ({
+        itemId,
+        quantitySold: parseNonNegativeInt(quantities.value[itemId]),
+        quantityOffered: parseNonNegativeInt(offeredQuantities.value[itemId]),
+      }))
+      .filter((l) => l.quantitySold !== null || l.quantityOffered !== null);
+
+    if (
+      lines.some(
+        (l) => Number.isNaN(l.quantitySold) || Number.isNaN(l.quantityOffered)
+      )
+    ) {
       throw new Error("Les quantités doivent être des entiers ≥ 0.");
     }
 
     const effectiveLines = (
-      lines as Array<{ itemId: string; quantitySold: number }>
-    ).filter((l) => l.quantitySold > 0);
-    const totalSold = effectiveLines.reduce(
-      (sum, l) => sum + l.quantitySold,
-      0
+      lines as Array<{ itemId: string; quantitySold: number; quantityOffered: number }>
+    ).filter((l) => l.quantitySold > 0 || l.quantityOffered > 0);
+    const totals = effectiveLines.reduce(
+      (acc, l) => {
+        acc.sold += l.quantitySold;
+        acc.offered += l.quantityOffered;
+        return acc;
+      },
+      { sold: 0, offered: 0 }
     );
 
     const res = await updateSalesCard(companyId.value, activeCard.value.id, {
       note: safeTrim(editNote.value) || undefined,
-      lines: lines as Array<{ itemId: string; quantitySold: number }>,
+      lines: lines as Array<{
+        itemId: string;
+        quantitySold: number;
+        quantityOffered?: number;
+      }>,
     });
 
     hydrateFromCard(res.data);
     successMessage.value =
       effectiveLines.length === 0
-        ? "Sauvegardé — aucune vente enregistrée. Tu peux continuer ou stopper pour soumettre."
-        : `Sauvegardé — ${totalSold} vente(s) sur ${effectiveLines.length} item(s). Tu peux continuer ou stopper pour soumettre.`;
+        ? "Sauvegardé — aucune ligne enregistrée. Tu peux continuer ou stopper pour soumettre."
+        : `Sauvegardé — ${totals.sold} vendu(s), ${totals.offered} offert(s) sur ${effectiveLines.length} item(s). Tu peux continuer ou stopper pour soumettre.`;
   } catch (error: unknown) {
     const message =
       (error as any)?.data?.message ||
@@ -346,10 +372,11 @@ onMounted(loadAll);
                   <TableHead>Item</TableHead>
                   <TableHead>Unité</TableHead>
                   <TableHead class="text-right">Quantité vendue</TableHead>
+                  <TableHead class="text-right">Quantité offerte</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableEmpty v-if="items.length === 0" :colspan="3">
+                <TableEmpty v-if="items.length === 0" :colspan="4">
                   Aucun item — crée-en d'abord dans Inventaire.
                 </TableEmpty>
 
@@ -361,6 +388,18 @@ onMounted(loadAll);
                   <TableCell class="text-right">
                     <NumberField
                       v-model="quantities[item.id]"
+                      :min="0"
+                      :step="1">
+                      <NumberFieldContent class="ml-auto w-32">
+                        <NumberFieldDecrement />
+                        <NumberFieldInput />
+                        <NumberFieldIncrement />
+                      </NumberFieldContent>
+                    </NumberField>
+                  </TableCell>
+                  <TableCell class="text-right">
+                    <NumberField
+                      v-model="offeredQuantities[item.id]"
                       :min="0"
                       :step="1">
                       <NumberFieldContent class="ml-auto w-32">
@@ -429,7 +468,7 @@ onMounted(loadAll);
           <AlertDialogTitle>Stopper le shift ?</AlertDialogTitle>
           <AlertDialogDescription>
             Le shift passera en <span class="font-semibold">SUBMITTED</span> et
-            impactera le stock (vendus depuis le snapshot).
+            impactera le stock (vendus + offerts depuis le snapshot).
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
