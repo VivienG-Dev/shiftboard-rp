@@ -357,6 +357,7 @@ model SalesCardLine {
   salesCardId  String
   itemId       String
   quantitySold Int
+  quantityOffered Int  @default(0)
   unitPrice    Decimal? @db.Decimal(10, 2)
   total        Decimal? @db.Decimal(10, 2)
 
