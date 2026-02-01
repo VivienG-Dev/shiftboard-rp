@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -17,6 +18,7 @@ export class PermissionsGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService,
   ) {}
+  private readonly logger = new Logger(PermissionsGuard.name);
 
   async canActivate(context: ExecutionContext) {
     const requiredAll = this.reflector.getAllAndOverride<PermissionKey[]>(PERMISSIONS_KEY, [
@@ -32,10 +34,17 @@ export class PermissionsGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const userId: string | undefined = request?.session?.user?.id ?? request?.user?.id;
-    if (!userId) throw new UnauthorizedException();
+    if (!userId) {
+      const path = request?.path ?? '';
+      const ip = request?.ip ?? '';
+      this.logger.warn(`Unauthorized request path=${path} ip=${ip}`);
+      throw new UnauthorizedException();
+    }
 
     const companyId: string | undefined = request?.params?.companyId;
     if (!companyId) {
+      const path = request?.path ?? '';
+      this.logger.warn(`Missing companyId user=${userId} path=${path}`);
       throw new BadRequestException('Missing companyId for permission check');
     }
 
@@ -50,6 +59,7 @@ export class PermissionsGuard implements CanActivate {
     });
 
     if (!membership || membership.company.archivedAt) {
+      this.logger.warn(`Forbidden: no company access user=${userId} company=${companyId}`);
       throw new ForbiddenException('No access to this company');
     }
 
@@ -67,6 +77,9 @@ export class PermissionsGuard implements CanActivate {
     if (requiredAll?.length) {
       const missing = requiredAll.filter((p) => !permissions.has(p));
       if (missing.length) {
+        this.logger.warn(
+          `Forbidden: missing permissions user=${userId} company=${companyId} missing=${missing.join(',')}`,
+        );
         throw new ForbiddenException(`Missing permissions: ${missing.join(', ')}`);
       }
     }
@@ -74,6 +87,9 @@ export class PermissionsGuard implements CanActivate {
     if (requiredAny?.length) {
       const ok = requiredAny.some((p) => permissions.has(p));
       if (!ok) {
+        this.logger.warn(
+          `Forbidden: missing any permission user=${userId} company=${companyId} requiredAny=${requiredAny.join(',')}`,
+        );
         throw new ForbiddenException(`Missing any permission of: ${requiredAny.join(', ')}`);
       }
     }
