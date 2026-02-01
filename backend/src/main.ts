@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from '../lib/auth';
@@ -11,6 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false, // Required for Better Auth
   });
+  const securityLogger = new Logger('Security');
 
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.disable('x-powered-by');
@@ -73,6 +74,43 @@ async function bootstrap() {
     return authLimiter(req, res, next);
   });
   expressApp.use(basePath, toNodeHandler(auth));
+
+  const inviteCreateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { error: 'Too many requests' },
+    handler: (req, res, _next, options) => {
+      const path = (req as { path?: string }).path ?? '';
+      securityLogger.warn(`Rate limit hit (invite create) ip=${req.ip} path=${path}`);
+      res.status(options.statusCode).send(options.message);
+    },
+  });
+
+  const inviteAcceptLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { error: 'Too many requests' },
+    handler: (req, res, _next, options) => {
+      const path = (req as { path?: string }).path ?? '';
+      securityLogger.warn(`Rate limit hit (invite accept) ip=${req.ip} path=${path}`);
+      res.status(options.statusCode).send(options.message);
+    },
+  });
+
+  expressApp.use((req, res, next) => {
+    const path = (req as { path?: string }).path ?? '';
+    if (req.method === 'POST' && /^\/companies\/[^/]+\/invites$/.test(path)) {
+      return inviteCreateLimiter(req, res, next);
+    }
+    if (req.method === 'POST' && /^\/invites\/[^/]+\/accept$/.test(path)) {
+      return inviteAcceptLimiter(req, res, next);
+    }
+    return next();
+  });
 
   const jsonBodyLimit = process.env.JSON_BODY_LIMIT ?? '1mb';
   const urlencodedBodyLimit = process.env.URLENCODED_BODY_LIMIT ?? '1mb';
