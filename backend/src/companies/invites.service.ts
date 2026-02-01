@@ -3,8 +3,10 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { randomInt } from 'crypto';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -12,14 +14,22 @@ function generateInviteCode(length = 6) {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let out = '';
   for (let i = 0; i < length; i++) {
-    out += alphabet[Math.floor(Math.random() * alphabet.length)];
+    out += alphabet[randomInt(alphabet.length)];
   }
   return out;
+}
+
+function maskEmail(email: string) {
+  const [user, domain] = email.split('@');
+  if (!user || !domain) return '***';
+  const visible = user.length <= 2 ? user.charAt(0) : user.slice(0, 2);
+  return `${visible}***@${domain}`;
 }
 
 @Injectable()
 export class InvitesService {
   constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(InvitesService.name);
 
   private async assertCompanyAccess(userId: string, companyId: string) {
     const membership = await this.prisma.membership.findFirst({
@@ -55,7 +65,7 @@ export class InvitesService {
     for (let attempt = 0; attempt < 5; attempt++) {
       const code = generateInviteCode(6);
       try {
-        return await this.prisma.invite.create({
+        const invite = await this.prisma.invite.create({
           data: {
             companyId,
             roleId,
@@ -67,6 +77,10 @@ export class InvitesService {
             type: 'EMAIL_CODE',
           },
         });
+        this.logger.log(
+          `Invite created user=${userId} company=${companyId} role=${roleId} email=${maskEmail(email)}`,
+        );
+        return invite;
       } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') continue;
         throw e;
@@ -90,10 +104,26 @@ export class InvitesService {
       where: { code: normalizedCode },
       include: { company: { select: { archivedAt: true } } },
     });
-    if (!invite || invite.company.archivedAt) throw new NotFoundException('Invite not found');
-    if (invite.status !== 'PENDING') throw new BadRequestException('Invite is not pending');
-    if (invite.expiresAt.getTime() < Date.now()) throw new BadRequestException('Invite has expired');
+    if (!invite || invite.company.archivedAt) {
+      this.logger.warn(`Invite accept failed: not found user=${userId} code=${normalizedCode}`);
+      throw new NotFoundException('Invite not found');
+    }
+    if (invite.status !== 'PENDING') {
+      this.logger.warn(
+        `Invite accept failed: status=${invite.status} user=${userId} company=${invite.companyId}`,
+      );
+      throw new BadRequestException('Invite is not pending');
+    }
+    if (invite.expiresAt.getTime() < Date.now()) {
+      this.logger.warn(
+        `Invite accept failed: expired user=${userId} company=${invite.companyId} email=${maskEmail(invite.email)}`,
+      );
+      throw new BadRequestException('Invite has expired');
+    }
     if (invite.email.toLowerCase() !== userEmail.toLowerCase()) {
+      this.logger.warn(
+        `Invite accept failed: email mismatch user=${userId} company=${invite.companyId} inviteEmail=${maskEmail(invite.email)} userEmail=${maskEmail(userEmail)}`,
+      );
       throw new ForbiddenException('Invite email does not match your account');
     }
 
@@ -127,6 +157,9 @@ export class InvitesService {
         },
       });
 
+      this.logger.log(
+        `Invite accepted user=${userId} company=${invite.companyId} role=${invite.roleId} email=${maskEmail(userEmail)}`,
+      );
       return { membershipId: membership.id, companyId: invite.companyId, roleId: invite.roleId };
     });
   }
