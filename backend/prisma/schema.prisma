@@ -116,7 +116,7 @@ model CompanyBankMovement {
   createdAt  DateTime                 @default(now())
 
   company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  restock   Restock?   @relation(fields: [restockId], references: [id], onDelete: SetNull)
+  restock   Restock?   @relation(fields: [restockId], references: [id], onDelete: Cascade)
   salesCard SalesCard? @relation(fields: [salesCardId], references: [id], onDelete: SetNull)
 
   @@index([companyId, createdAt])
